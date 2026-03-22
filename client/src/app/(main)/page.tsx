@@ -1,11 +1,17 @@
-
+"use client"
 import HeroComponent from '../components/hero'
 import Stats from '../components/stats'
 import ButtonCustom from '../components/buttonCustom'
 import { ArrowRight, Plus } from 'lucide-react'
 import WordList from '../components/wordList'
+import { useAppSelector } from '@/store/hooks'
+import { useEffect } from 'react'
 
 const HomePage = () => {
+    const  user  = useAppSelector((state) => state.auth.user)
+    useEffect(() => {
+        console.log("user", user)
+    }, [user])
     return (
         <div>
             <HeroComponent />

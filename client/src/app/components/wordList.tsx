@@ -4,7 +4,6 @@ import WordItem from './wordItem'
 
 const WordList = () => {
     const { data, isLoading, error } = useGetWordsQuery();
-    console.log(data);
 
     return (
         <div className='mt-8 flex flex-col'>

@@ -16,7 +16,7 @@ const prisma = new PrismaClient({
 export const register = async (req: Request, res: Response) => {
     try {
         const { name, email, password } = req.body;
-        console.log("password type:", typeof password, "value:", password);
+
         if (!name || !email || !password) {
             return res.status(400).json({ message: "Name, email and password are required" });
         }
@@ -99,9 +99,17 @@ export const login = async (req: Request, res: Response) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         })
-        res.json({ accessToken })
+        res.json({
+            accessToken, user: {
+                id: user.id,
+                name: user.name || '',
+                email: user.email,
+            }
+        })
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
@@ -170,6 +178,31 @@ export const logout = async (req: Request, res: Response) => {
         res.clearCookie("refreshToken")
         res.json({ message: "Logged out successfully" });
     } catch (error: any) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+export const getMe = async (req: Request, res: Response) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: req.user?.userId as string
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                avatarUrl: true,
+                  
+              }
+        })
+        if(!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json({user})
+
+        
+    } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
     }
