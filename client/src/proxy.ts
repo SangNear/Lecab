@@ -28,7 +28,8 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/",
+    "/dashboard",
+    "/library",
     "/login",
     "/register",
     "/review",

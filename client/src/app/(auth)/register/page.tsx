@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
-import ButtonCustom from '@/app/components/buttonCustom'
+import ButtonCustom from '@/components/custom/buttonCustom'
 import { MoveRight } from 'lucide-react'
 
 const registerSchema = z.object({

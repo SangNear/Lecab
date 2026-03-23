@@ -1,4 +1,4 @@
-import ButtonCustom from '@/app/components/buttonCustom'
+import ButtonCustom from '@/components/custom/buttonCustom'
 import { Plus } from 'lucide-react'
 import React from 'react'
 

@@ -1,5 +1,5 @@
 "use client"
-import ButtonCustom from '@/app/components/buttonCustom'
+import ButtonCustom from '@/components/custom/buttonCustom'
 import { Progress } from '@/components/ui/progress'
 import { Check, CornerDownLeft } from 'lucide-react'
 import { useState } from 'react'

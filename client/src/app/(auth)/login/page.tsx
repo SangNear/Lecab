@@ -1,5 +1,5 @@
 "use client"
-import ButtonCustom from '@/app/components/buttonCustom'
+import ButtonCustom from '@/components/custom/buttonCustom'
 
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'

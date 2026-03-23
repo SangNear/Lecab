@@ -1,4 +1,4 @@
-import Form from '@/app/components/form'
+import Form from '@/components/custom/form'
 import { ArrowLeftIcon } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'

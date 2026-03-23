@@ -1,14 +1,19 @@
-import Container from "../components/container";
-import HeaderComponent from "../components/header";
+
+import Sidebar from "@/components/custom/sidebar";
+import Container from "../../components/custom/container";
+import HeaderComponent from "../../components/custom/header";
 
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="flex flex-col ">
-            <Container>
+        <div className="flex w-full">
+            <Sidebar />
+            <main className="flex flex-col w-full mx-auto">
                 <HeaderComponent />
-                {children}
-            </Container>
+                <Container>
+                    {children}
+                </Container>
+            </main>
         </div>
     );
 }

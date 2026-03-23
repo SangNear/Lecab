@@ -1,13 +1,10 @@
 export default function Container({ children }: { children: React.ReactNode }) {
     return (
         <div className="
-        min-w-[360px] 
         w-full
-        mx-auto 
-        sm:max-w-[680px]
-        py-8
-        pb-16
-        px-5
+        lg:px-20
+        px-10
+        py-10
       ">
             {children}
         </div>

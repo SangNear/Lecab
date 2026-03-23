@@ -1,9 +1,9 @@
 "use client"
-import HeroComponent from '../components/hero'
-import Stats from '../components/stats'
-import ButtonCustom from '../components/buttonCustom'
+import HeroComponent from '../../components/custom/hero'
+import Stats from '../../components/custom/stats'
+import ButtonCustom from '../../components/custom/buttonCustom'
 import { ArrowRight, Plus } from 'lucide-react'
-import WordList from '../components/wordList'
+import WordList from '../../components/custom/wordList'
 import { useAppSelector } from '@/store/hooks'
 import { useEffect } from 'react'
 
