@@ -10,8 +10,8 @@ const AddWordPage = () => {
         <ArrowLeftIcon className='w-4 h-4' />
         <span>Back</span>
       </Link>
-      <h1 className='font-lora text-[25.6px] text-foreground mb-[6.4px]'>Add a word</h1>
-      <p className='text-[15.12px] text-[#B0ACA8] mb-8  tracking-wider font-extralight' >It will be queued for review today.</p>
+      <h1 className='text-4xl md:text-5xl font-serif font-bold italic tracking-tight mb-4 text-center'>Tạo thẻ từ mới</h1>
+      <p className='text-gray-400 font-medium text-center' >Lưu trữ từ vựng mới và để AI giúp bạn hoàn thiện ví dụ.</p>
       <Form />
     </div>
   )

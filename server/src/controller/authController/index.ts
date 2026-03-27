@@ -4,14 +4,15 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { comparePassword, generateAccessToken, generateRefreshToken, hashPassword, hashToken } from "../../utility/index.js";
 import jwt from "jsonwebtoken";
+import { prisma } from "../../lib/prisma.js";
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-});
+// const pool = new Pool({
+//     connectionString: process.env.DATABASE_URL,
+// });
 
-const prisma = new PrismaClient({
-    adapter: new PrismaPg(pool),
-});
+// const prisma = new PrismaClient({
+//     adapter: new PrismaPg(pool),
+// });
 
 export const register = async (req: Request, res: Response) => {
     try {
