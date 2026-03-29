@@ -39,23 +39,27 @@ interface GetWordsResponse {
 export const wordApi = createApi({
     reducerPath: "wordApi",
     baseQuery: baseQueryWithReauth,
+    tagTypes: ['words'],
     endpoints: (builder) => ({
         createWord: builder.mutation<WordType, WordPayload>({
             query: (word) => ({
                 url: "word/add-word",
                 method: "POST",
                 body: word,
-            })
+            }),
+            invalidatesTags:['words']
         }),
         getWords: builder.query<WordType[], void>({
             query: () => ({
                 url: "word/get-words",
                 method: "GET",
             }),
+            providesTags: ['words'],
             transformResponse: (response: GetWordsResponse | WordType[]) => {
                 if (Array.isArray(response)) return response;
                 return response?.data ?? [];
             },
+            
         })
     })
 })
