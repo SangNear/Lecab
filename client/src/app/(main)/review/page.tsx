@@ -1,70 +1,105 @@
 "use client"
 import ButtonCustom from '@/components/custom/buttonCustom'
+import ProgressReview from '@/components/custom/progressReview'
+import WordToReview from '@/components/custom/wordToReview'
 import { Progress } from '@/components/ui/progress'
+import { useGetWordsToReviewQuery, useUpdateWordReviewMutation, WordType } from '@/store/api/wordApi'
 import { Check, CornerDownLeft, Layers, Volume2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 
 const ReviewPage = () => {
-    const [isRevealed, setIsRevealed] = useState(false)
 
+    const [currentIndex, setCurrentIndex] = useState(0)
+
+
+    const { data: wordsToReview = [] } = useGetWordsToReviewQuery()
+    const [updateWordReview, { isLoading }] = useUpdateWordReviewMutation()
+
+    const currentWord = wordsToReview?.[currentIndex]
+
+    const [isRevealed, setIsRevealed] = useState(false)
     const handleRevealed = () => {
         setIsRevealed(true)
+
     }
-    const voice = new SpeechSynthesisUtterance('overwhelming')
-    
+    const voice = new SpeechSynthesisUtterance(currentWord?.word)
+
     const handleVoice = () => {
         speechSynthesis.speak(voice)
     }
+
+    const handleNextWord = async (performance: "again" | "easy") => {
+        console.log("performance", performance);
+        if (currentIndex <= wordsToReview.length - 1) {
+            await updateWordReview({
+                wordId: currentWord?.id,
+                performance: performance,
+            })
+                .unwrap()
+                .then((res) => {
+                    console.log("res", res)
+                    toast.success("Sẽ review sau vài ngày nữa")
+                    setCurrentIndex(currentIndex + 1)
+                    setIsRevealed(false)
+                })
+                .catch((err) => {
+                    toast.error("Lỗi khi cập nhật đánh giá từ")
+                })
+
+        }
+        else {
+            console.log("end of words")
+            toast.success("You have reviewed all words")
+        }
+    }
+
+
+
+
     return (
         <div className='flex     justify-evenly gap-20'>
             <div className=' flex-2 flex flex-col max-w-3xl'>
-                <div className='flex items-center justify-center gap-2 border border-gray-200 rounded-full py-4 px-6 '>
-                    <p className='text-gray-500 text-[11px] font-bold uppercase tracking-wider whitespace-nowrap leading-none'>Tiến trình ôn tập</p>
 
-                    <Progress value={50} className=" flex-1 w-full max-w-3xl leading-none transition-all duration-300" />
+                {currentWord ? <ProgressReview /> : null}
 
-
-                    <p className='text-muted text-xs leading-none tracking-[0.816px] font-sans font-weight-[300] text-center'>1 of 2</p>
-                </div>
-
-                <div
-                    onClick={handleRevealed}
-                    className={`py-10 px-8 mt-12  flex flex-col items-center justify-center border 
-                                border-border rounded-lg bg-card relative min-h-[280px] 
-                                ${isRevealed ? "" : "hover:translate-y-[-5px] duration-150 hover:shadow-lg cursor-pointer"} `}
-                >
-                    <p className='tracking-wider text-[#C8C5C0] text-sm uppercase mb-4'>
-                        {isRevealed ? 'meaning' : 'tap to reveal'}
-                    </p>
-                    <div onClick={handleVoice} className='absolute top-4 right-4 p-2 rounded-sm bg-gray-100 text-muted cursor-pointer hover:translate-y-[-5px] duration-150 hover:shadow-lg hover:bg-orange-300 hover:text-white'>
-                        <Volume2 />
-                    </div>
-                    <p className='text-foreground text-[38px] font-lora'>apple</p>
-                    {isRevealed && <p className='text-[#4a4845] text-[16px] mt-4'>a hard round fruit that has red, light green, or yellow skin and is white inside</p>}
-                    {isRevealed && <p className='text-[#B0ACA8] text-[14px] italic mt-3'>"The apple doesn’t fall far from the tree"</p>}
-                    <div className='absolute bottom-4 flex gap-1'>
-                        <span className='w-1.5 h-1.5 rounded-full bg-[#e0ddd8]'></span>
-                        <span className='w-1.5 h-1.5 rounded-full bg-[#e0ddd8]'></span>
-                        <span className='w-1.5 h-1.5 rounded-full bg-[#e0ddd8]'></span>
-                    </div>
-                </div>
-                {/* <p className='text-center text-gray-300 text-[16px] mt-5 tracking-wider  whitespace-nowrap'>Think about the meaning, then tap the card</p> */}
-                <div className='grid grid-cols-2 gap-4 mt-5'>
-                    <ButtonCustom
-                        description='review tomorrow'
-                        className='bg-[#Fdf3ec] rounded-[14px] border-[0.5px] border-[#edd8c0] text-danger transition-transform hover:bg-[#f8e9d8] hover:-translate-y-0.25 duration-150'
-                        title='Again'
-                        icon={<CornerDownLeft />}
+                {currentWord ?
+                    <WordToReview
+                        currentWord={currentWord}
+                        isRevealed={isRevealed}
+                        handleRevealed={handleRevealed}
+                        handleVoice={handleVoice}
                     />
+                    :
+                    <div className='flex items-center justify-center h-full'>
+                        <p className='text-center text-gray-300 text-[16px] mt-5 tracking-wider  whitespace-nowrap'>Hôm nay không có từ nào để ôn tập. Quay lại sau</p>
+                    </div>
+                }
 
-                    <ButtonCustom
-                        description='review in 3 days'
-                        className='bg-[#EEF5F0] rounded-[14px] border-[0.5px] border-[#B2CDB9] text-[#3E7256] transition-transform hover:bg-[#DFF0E5] hover:-translate-y-0.25 duration-150'
-                        title='Easy'
-                        icon={<Check />}
-                    />
-                </div>
+
+                {currentWord ?
+                    <div className='grid grid-cols-2 gap-4 mt-5'>
+                        <ButtonCustom
+                            description='review tomorrow'
+                            className='bg-[#Fdf3ec] rounded-[14px] border-[0.5px] border-[#edd8c0] text-danger transition-transform hover:bg-[#f8e9d8] hover:-translate-y-0.25 duration-150'
+                            title='Again'
+                            icon={<CornerDownLeft />}
+                            onClick={() => handleNextWord("again")}
+
+                        />
+
+                        <ButtonCustom
+                            description='review in 3 days'
+                            className='bg-[#EEF5F0] rounded-[14px] border-[0.5px] border-[#B2CDB9] text-[#3E7256] transition-transform hover:bg-[#DFF0E5] hover:-translate-y-0.25 duration-150'
+                            title='Easy'
+                            icon={<Check />}
+                            onClick={() => handleNextWord("easy")}
+                        />
+                    </div>
+                    :
+                    null
+                }
             </div>
 
             <div className='hidden flex-1 md:flex flex-col items-center   w-80  max-w-80'>

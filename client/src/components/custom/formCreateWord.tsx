@@ -14,7 +14,7 @@ const wordSchema = z.object({
 })
 
 type WordFormValues = z.infer<typeof wordSchema>
-const Form = () => {
+const formCreateWord = () => {
     const router = useRouter()
     const [createWord, { isLoading, error }] = useCreateWordMutation()
     const { register, handleSubmit, formState: { errors } } = useForm<WordFormValues>({
@@ -86,4 +86,4 @@ const Form = () => {
     )
 }
 
-export default Form
+export default formCreateWord

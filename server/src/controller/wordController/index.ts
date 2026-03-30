@@ -72,9 +72,6 @@ export async function addWord(req: Request, res: Response) {
             return res.status(401).json({ message: "Unauthorized" });
         }
         const { word, meaning, example, cefrLevel, correctCount, wrongCount, level, pronunciation, isFavorite, } = req.body;
-        console.log({
-            data: req.body
-        });
         if (word === "" || meaning === "" || example.length === 0) {
             return res.status(400).json({ message: "Missing required fields" });
         }
@@ -179,6 +176,54 @@ export async function getWordsToReview(req: Request, res: Response) {
         });
     } catch (error) {
         console.error("Error in getWordsToReview:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+export async function updateWordReview(req: Request, res: Response) {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+        const { wordId, performance } = req.body;
+        if (!wordId || !performance) return res.status(400).json({ message: "Missing required fields" });
+
+        const word = await prisma.word.findUnique({
+            where: {
+                id: wordId,
+                userId: userId,
+            },
+
+        })
+        if (!word) return res.status(404).json({ message: "Word not found" });
+
+
+        let dayToAdd = 0;
+
+        if (performance === "again") {
+            word.wrongCount = word.wrongCount + 1; // Tăng số lần nhập sai
+            dayToAdd = 1
+            word.nextReviewDate = new Date(Date.now() + dayToAdd * 24 * 60 * 60 * 1000); // 1 day
+            word.lastReviewedAt = new Date(Date.now()); // Cập nhật thời gian nhập sai
+            word.level = 1; // Reset level về 1
+        }
+        if (performance === "easy") {
+            word.correctCount = word.correctCount + 1; // Tăng số lần nhập đúng
+            word.level = word.level + 1; // Tăng level
+            dayToAdd = Math.pow(2, word.level - 1); // Tính toán số ngày nhập đúng
+            word.nextReviewDate = new Date(Date.now() + (dayToAdd * 24 * 60 * 60 * 1000)); // Tính toán ngày nhập đúng
+            word.lastReviewedAt = new Date(Date.now()); // Cập nhật thời gian nhập đúng
+        }
+
+        await prisma.word.update({
+            where: {
+                id: wordId,
+                userId: userId,
+            },
+            data: word,
+        })
+        return res.status(200).json({ message: "Word updated successfully", word: word });
+    } catch (error) {
+        console.error("Error in updateWordReview:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }

@@ -60,7 +60,25 @@ export const wordApi = createApi({
                 return response?.data ?? [];
             },
             
+        }),
+        getWordsToReview: builder.query<WordType[], void>({
+            query: () => ({
+                url: "word/get-words-to-review",
+                method: "GET",
+            }),
+            transformResponse: (response: GetWordsResponse | WordType[]) => {
+                if (Array.isArray(response)) return response;
+                return response?.data ?? [];
+            }
+        }),
+        updateWordReview: builder.mutation<WordType, { wordId: string, performance: "again" | "easy" }>({
+            query: ({ wordId, performance }) => ({
+                url: "word/update-word-review",
+                method: "POST",
+                body: { wordId, performance },
+            }),
+            invalidatesTags: ['words']
         })
     })
 })
-export const { useCreateWordMutation, useGetWordsQuery } = wordApi;
+export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation } = wordApi;
