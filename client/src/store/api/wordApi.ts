@@ -39,7 +39,7 @@ interface GetWordsResponse {
 export const wordApi = createApi({
     reducerPath: "wordApi",
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['words'],
+    tagTypes: ['words', 'wordsToReview'],
     endpoints: (builder) => ({
         createWord: builder.mutation<WordType, WordPayload>({
             query: (word) => ({
@@ -47,7 +47,7 @@ export const wordApi = createApi({
                 method: "POST",
                 body: word,
             }),
-            invalidatesTags:['words']
+            invalidatesTags:['words', 'wordsToReview']
         }),
         getWords: builder.query<WordType[], void>({
             query: () => ({
@@ -66,6 +66,7 @@ export const wordApi = createApi({
                 url: "word/get-words-to-review",
                 method: "GET",
             }),
+            providesTags: ['wordsToReview'],
             transformResponse: (response: GetWordsResponse | WordType[]) => {
                 if (Array.isArray(response)) return response;
                 return response?.data ?? [];
@@ -77,7 +78,7 @@ export const wordApi = createApi({
                 method: "POST",
                 body: { wordId, performance },
             }),
-            invalidatesTags: ['words']
+            invalidatesTags: ['wordsToReview', 'words']
         })
     })
 })
