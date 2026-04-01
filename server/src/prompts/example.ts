@@ -1,0 +1,1 @@
+export const LEXIS_PROMPT_SYNONYMS =``
