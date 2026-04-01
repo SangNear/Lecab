@@ -73,6 +73,7 @@ export async function addWord(req: Request, res: Response) {
                 meaning,
                 example,
                 pronunciation,
+
                 cefrLevel,
                 correctCount: 0,
                 wrongCount: 0,
@@ -80,8 +81,32 @@ export async function addWord(req: Request, res: Response) {
                 isFavorite: false,
                 lastReviewedAt: null,
                 nextReviewDate: new Date(),
+                
             }
         })
+
+        if (newWord) {
+
+            const prompt = LEXIS_PROMPT_SYNONYMS(newWord.word).trim();
+            const response = await ai.models.generateContent({
+                model: 'gemma-3-27b-it',
+                contents: prompt
+
+            });
+
+            let textResponse = response.text;
+
+            textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
+
+            const jsonResult = JSON.parse(textResponse as string);
+            
+            await prisma.synonym.create({
+                data: {
+                    wordId: newWord.id,
+                    data: jsonResult
+                }
+            })
+        }
         return res.status(201).json({ message: "Word added successfully", word: newWord });
     } catch (error: any) {
         return res.status(500).json({
@@ -229,7 +254,7 @@ export async function generateSynonyms(req: Request, res: Response) {
 
         const prompt = LEXIS_PROMPT_SYNONYMS(word).trim();
 
-        // Sử dụng tính năng responseMimeType để ép AI trả về JSON mà không có markdown
+
         const response = await ai.models.generateContent({
             model: 'gemma-3-27b-it',
             contents: prompt
@@ -240,7 +265,7 @@ export async function generateSynonyms(req: Request, res: Response) {
 
         textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
 
-        //   // Đã có responseMimeType thì không cần replace regex nữa, parse thẳng luôn
+
         const jsonResult = JSON.parse(textResponse as string);
 
         return res.status(200).json(jsonResult);
@@ -248,13 +273,30 @@ export async function generateSynonyms(req: Request, res: Response) {
     } catch (error: any) {
         console.error("Error in generateSynonyms:", error);
 
-        // Xử lý riêng cho lỗi từ Google API
         if (error.status === 503 || error.status === 429) {
             return res.status(503).json({
-                message: "Dịch vụ đang quá tải, ông thử lại sau vài giây nhé!"
+                message: "Dịch vụ đang quá tải, thử lại sau vài giây nhé!"
             });
         }
 
-        return res.status(500).json({ message: "Lỗi server nội bộ rồi đại vương ơi." });
+        return res.status(500).json({ message: "Lỗi server nội bộ." });
+    }
+}
+export async function getSynonyms(req: Request, res: Response) {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+        const { wordId } = req.body;
+        if (!wordId) return res.status(400).json({ message: "Word ID is required" });
+
+        const synonyms = await prisma.synonym.findMany({
+            where: {
+                wordId: wordId,
+            },
+        });
+        return res.status(200).json({ success: true, data: synonyms[0]?.data });
+    } catch (error) {
+        console.error("Error in getSynonyms:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 }
