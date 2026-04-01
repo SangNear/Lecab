@@ -36,10 +36,27 @@ interface GetWordsResponse {
         limit: number;
     };
 }
+interface SynonymExample {
+    word: string;
+    level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+    popularity: 1 | 2 | 3 | 4 | 5;
+    register: "Formal" | "Informal" | "Slang";
+    meaning: string;
+    example: [string, string]; // đúng 2 câu ví dụ
+}
+
+export interface SynonymGroup {
+        sense: string; // context_description_in_english
+        synonyms: SynonymExample[];
+}
+
+ interface SynonymResponse {
+    synonyms_groups: SynonymGroup[];
+}
 export const wordApi = createApi({
     reducerPath: "wordApi",
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['words', 'wordsToReview'],
+    tagTypes: ['words', 'wordsToReview', 'synonyms'],
     endpoints: (builder) => ({
         createWord: builder.mutation<WordType, WordPayload>({
             query: (word) => ({
@@ -47,7 +64,7 @@ export const wordApi = createApi({
                 method: "POST",
                 body: word,
             }),
-            invalidatesTags:['words', 'wordsToReview']
+            invalidatesTags: ['words', 'wordsToReview']
         }),
         getWords: builder.query<WordType[], void>({
             query: () => ({
@@ -59,7 +76,7 @@ export const wordApi = createApi({
                 if (Array.isArray(response)) return response;
                 return response?.data ?? [];
             },
-            
+
         }),
         getWordsToReview: builder.query<WordType[], void>({
             query: () => ({
@@ -79,7 +96,8 @@ export const wordApi = createApi({
                 body: { wordId, performance },
             }),
             invalidatesTags: ['wordsToReview', 'words']
-        })
+        }),
+
     })
 })
 export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation } = wordApi;

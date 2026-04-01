@@ -5,26 +5,27 @@ import ProgressReview from '@/components/custom/progressReview'
 import SynonymComponent from '@/components/custom/synonym'
 import WordToReview from '@/components/custom/wordToReview'
 
-import { useGetWordsToReviewQuery, useUpdateWordReviewMutation } from '@/store/api/wordApi'
-import { Check, CircleCheck, CornerDownLeft, Zap } from 'lucide-react'
-import { useState } from 'react'
+import { SynonymGroup, useGetWordsToReviewQuery, useUpdateWordReviewMutation } from '@/store/api/wordApi'
+import { Check, CornerDownLeft } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 
 const ReviewPage = () => {
 
     const [currentIndex, setCurrentIndex] = useState(0)
+    const [synonyms, setSynonyms] = useState<SynonymGroup[]>([])
 
 
-    const { data: wordsToReview = [] } = useGetWordsToReviewQuery()
+    const { data: wordsToReview = [], isLoading: isLoadingWordsToReview } = useGetWordsToReviewQuery()
     const [updateWordReview, { isLoading }] = useUpdateWordReviewMutation()
+
 
     const currentWord = wordsToReview?.[currentIndex]
 
     const [isRevealed, setIsRevealed] = useState(false)
-    const handleRevealed = () => {
+    const handleRevealed = async () => {
         setIsRevealed(true)
-
     }
     const voice = new SpeechSynthesisUtterance(currentWord?.word)
 
@@ -57,55 +58,52 @@ const ReviewPage = () => {
         }
     }
 
+    
 
 
 
     return (
-        <div className='flex     justify-evenly gap-20'>
-            <div className=' flex-2 flex flex-col max-w-3xl'>
+        <div className='flex flex-col lg:flex-row justify-evenly gap-20'>
 
-                {currentWord ? <ProgressReview /> : null}
-
-                {currentWord ?
-                    <WordToReview
-                        currentWord={currentWord}
-                        isRevealed={isRevealed}
-                        handleRevealed={handleRevealed}
-                        handleVoice={handleVoice}
-                    />
-                    :
-                    <EmptyReview />
-                }
-
-
-                {currentWord ?
-                    <div className='grid grid-cols-2 gap-4 mt-5'>
-                        <ButtonCustom
-                            description='review tomorrow'
-                            className='bg-[#Fdf3ec] rounded-[14px] border-[0.5px] border-[#edd8c0] text-danger transition-transform hover:bg-[#f8e9d8] hover:-translate-y-0.25 duration-150'
-                            title='Again'
-                            icon={<CornerDownLeft />}
-                            onClick={() => handleNextWord("again")}
-
+            {isLoadingWordsToReview ? (
+                <div>Đang tải...</div> // Hoặc một Skeleton UI đẹp mắt
+            ) : wordsToReview.length > 0 && currentWord ? (
+                <>
+                    <div className='flex-2 flex flex-col max-w-3xl'>
+                        <ProgressReview />
+                        <WordToReview
+                            currentWord={currentWord}
+                            isRevealed={isRevealed}
+                            handleRevealed={handleRevealed}
+                            handleVoice={handleVoice}
                         />
-                        <ButtonCustom
-                            description='review in 3 days'
-                            className='bg-[#EEF5F0] rounded-[14px] border-[0.5px] border-[#B2CDB9] text-[#3E7256] transition-transform hover:bg-[#DFF0E5] hover:-translate-y-0.25 duration-150'
-                            title='Easy'
-                            icon={<Check />}
-                            onClick={() => handleNextWord("easy")}
-                        />
+
+                        <div className='grid grid-cols-2 gap-4 mt-5'>
+
+                            <ButtonCustom
+                                description='review tomorrow'
+                                className='bg-[#Fdf3ec] rounded-[14px] border-[0.5px] border-[#edd8c0] text-danger transition-transform hover:bg-[#f8e9d8] hover:-translate-y-0.25 duration-150'
+                                title='Again'
+                                icon={<CornerDownLeft />}
+                                onClick={() => handleNextWord("again")}
+
+                            />
+                            <ButtonCustom
+                                description='review in 3 days'
+                                className='bg-[#EEF5F0] rounded-[14px] border-[0.5px] border-[#B2CDB9] text-[#3E7256] transition-transform hover:bg-[#DFF0E5] hover:-translate-y-0.25 duration-150'
+                                title='Easy'
+                                icon={<Check />}
+                                onClick={() => handleNextWord("easy")}
+                            />
+
+                        </div>
                     </div>
-                    :
-                    null
-                }
-            </div>
+                    <SynonymComponent synonyms={synonyms} />
+                </>
+            ) : (
+                <EmptyReview />
+            )}
 
-            {currentWord ?
-                <SynonymComponent />
-                :
-                null
-            }
         </div>
 
     )

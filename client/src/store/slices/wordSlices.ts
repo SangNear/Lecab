@@ -20,6 +20,8 @@ const wordSlice = createSlice({
       state.currentPage = action.payload;
     },
     setActiveFilter: (state, action: PayloadAction<string>) => {
+      console.log("setActiveFilter", action);
+      localStorage.setItem('activeFilter', state.activeFilter);
       state.activeFilter = action.payload;
     },
     setTotalItems: (state, action: PayloadAction<number>) => {
