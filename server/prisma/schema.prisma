@@ -60,6 +60,9 @@ model Word {
   correctCount Int @default(0)
   wrongCount   Int @default(0)
 
+  easinessFactor Float @default(2.5)
+  intervalDays Int @default(0)
+
   // 🎨 UI / trạng thái
 
   isFavorite Boolean    @default(false)

@@ -50,8 +50,14 @@ export interface SynonymGroup {
         synonyms: SynonymExample[];
 }
 
- interface SynonymResponse {
+interface SynonymResponse {
     synonyms_groups: SynonymGroup[];
+}
+
+/** Body of `GET /word/get-synonyms` */
+interface GetSynonymsApiResponse {
+    success?: boolean;
+    data?: SynonymResponse | null;
 }
 export const wordApi = createApi({
     reducerPath: "wordApi",
@@ -97,7 +103,17 @@ export const wordApi = createApi({
             }),
             invalidatesTags: ['wordsToReview', 'words']
         }),
+        getSynonyms: builder.query<SynonymGroup[], { wordId: string }>({
+            query: ({ wordId }) => ({
+                url: `word/get-synonyms?wordId=${encodeURIComponent(wordId)}`,
+                method: "GET",
+            }),
+            providesTags: ['synonyms'],
+            transformResponse: (response: GetSynonymsApiResponse) => {
+                return response?.data?.synonyms_groups ?? [];
+            }
+        })
 
     })
 })
-export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation } = wordApi;
+export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery } = wordApi;

@@ -81,7 +81,7 @@ export async function addWord(req: Request, res: Response) {
                 isFavorite: false,
                 lastReviewedAt: null,
                 nextReviewDate: new Date(),
-                
+
             }
         })
 
@@ -99,7 +99,7 @@ export async function addWord(req: Request, res: Response) {
             textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
 
             const jsonResult = JSON.parse(textResponse as string);
-            
+
             await prisma.synonym.create({
                 data: {
                     wordId: newWord.id,
@@ -195,49 +195,67 @@ export async function getWordsToReview(req: Request, res: Response) {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
 export async function updateWordReview(req: Request, res: Response) {
     try {
         const userId = req.user?.userId;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { wordId, performance } = req.body;
-        if (!wordId || !performance) return res.status(400).json({ message: "Missing required fields" });
-
+        const { wordId, performance, duration } = req.body;
+        
         const word = await prisma.word.findUnique({
-            where: {
-                id: wordId,
-                userId: userId,
-            },
+            where: { id: wordId, userId: userId },
+        });
 
-        })
         if (!word) return res.status(404).json({ message: "Word not found" });
 
+        let newEF = word.easinessFactor;
+        let newInterval = word.intervalDays;
 
-        let dayToAdd = 0;
-
-        if (performance === "again") {
-            word.wrongCount = word.wrongCount + 1; // Tăng số lần nhập sai
-            dayToAdd = 1
-            word.nextReviewDate = new Date(Date.now() + dayToAdd * 24 * 60 * 60 * 1000); // 1 day
-            word.lastReviewedAt = new Date(Date.now()); // Cập nhật thời gian nhập sai
-            word.level = 1; // Reset level về 1
-        }
         if (performance === "easy") {
-            word.correctCount = word.correctCount + 1; // Tăng số lần nhập đúng
-            word.level = word.level + 1; // Tăng level
-            dayToAdd = Math.pow(2, word.level - 1); // Tính toán số ngày nhập đúng
-            word.nextReviewDate = new Date(Date.now() + (dayToAdd * 24 * 60 * 60 * 1000)); // Tính toán ngày nhập đúng
-            word.lastReviewedAt = new Date(Date.now()); // Cập nhật thời gian nhập đúng
+            // 1. Cập nhật EF trước để dùng cho tính toán interval
+            if (duration < 2000) newEF += 0.15;
+            else if (duration < 5000) newEF += 0.1;
+            else newEF -= 0.15;
+
+            // Chặn ngưỡng EF ngay
+            if (newEF < 1.3) newEF = 1.3;
+            if (newEF > 2.8) newEF = 2.8;
+
+            // 2. Tính toán Interval
+            if (word.intervalDays === 0) newInterval = 1;
+            else if (word.intervalDays === 1) newInterval = 3;
+            else newInterval = Math.floor(word.intervalDays * newEF);
+            
+            word.correctCount += 1;
+        } else {
+            // Trường hợp "Chưa thuộc"
+            word.wrongCount += 1;
+            newInterval = 1;
+            newEF = Math.max(1.3, newEF - 0.2);
         }
 
-        await prisma.word.update({
-            where: {
-                id: wordId,
-                userId: userId,
+        const nextReviewDate = new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000);
+
+        // Cập nhật Database
+        const updatedWord = await prisma.word.update({
+            where: { id: wordId },
+            data: {
+                correctCount: word.correctCount,
+                wrongCount: word.wrongCount,
+                intervalDays: newInterval,
+                easinessFactor: newEF,
+                nextReviewDate: nextReviewDate // Đừng quên update ngày này vào DB nhé!
             },
-            data: word,
-        })
-        return res.status(200).json({ message: "Word updated successfully", word: word });
+        });
+
+        // Trả về kết quả cho Client
+        return res.status(200).json({ 
+            nextInterval: updatedWord.intervalDays, 
+            nextEF: parseFloat(updatedWord.easinessFactor.toFixed(2)),
+            nextReviewDate: updatedWord.nextReviewDate
+        });
+
     } catch (error) {
         console.error("Error in updateWordReview:", error);
         return res.status(500).json({ message: "Internal Server Error" });
@@ -286,8 +304,10 @@ export async function getSynonyms(req: Request, res: Response) {
     try {
         const userId = req.user?.userId;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
-        const { wordId } = req.body;
-        if (!wordId) return res.status(400).json({ message: "Word ID is required" });
+        const wordId = req.query.wordId;
+        if (!wordId || typeof wordId !== "string") {
+            return res.status(400).json({ message: "Word ID is required" });
+        }
 
         const synonyms = await prisma.synonym.findMany({
             where: {

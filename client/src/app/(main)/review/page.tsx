@@ -5,23 +5,25 @@ import ProgressReview from '@/components/custom/progressReview'
 import SynonymComponent from '@/components/custom/synonym'
 import WordToReview from '@/components/custom/wordToReview'
 
-import { SynonymGroup, useGetWordsToReviewQuery, useUpdateWordReviewMutation } from '@/store/api/wordApi'
+import { useGetSynonymsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation } from '@/store/api/wordApi'
 import { Check, CornerDownLeft } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 
 const ReviewPage = () => {
 
     const [currentIndex, setCurrentIndex] = useState(0)
-    const [synonyms, setSynonyms] = useState<SynonymGroup[]>([])
-
 
     const { data: wordsToReview = [], isLoading: isLoadingWordsToReview } = useGetWordsToReviewQuery()
     const [updateWordReview, { isLoading }] = useUpdateWordReviewMutation()
 
 
     const currentWord = wordsToReview?.[currentIndex]
+    const { data: synonymsData = [] } = useGetSynonymsQuery(
+        { wordId: currentWord?.id ?? '' },
+        { skip: !currentWord?.id },
+    )
 
     const [isRevealed, setIsRevealed] = useState(false)
     const handleRevealed = async () => {
@@ -57,10 +59,6 @@ const ReviewPage = () => {
             toast.success("You have reviewed all words")
         }
     }
-
-    
-
-
 
     return (
         <div className='flex flex-col lg:flex-row justify-evenly gap-20'>
@@ -98,7 +96,7 @@ const ReviewPage = () => {
 
                         </div>
                     </div>
-                    <SynonymComponent synonyms={synonyms} />
+                    <SynonymComponent synonyms={synonymsData} />
                 </>
             ) : (
                 <EmptyReview />
