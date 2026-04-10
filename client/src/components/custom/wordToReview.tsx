@@ -1,6 +1,6 @@
 import { WordType } from '@/store/api/wordApi'
 import { Volume2 } from 'lucide-react'
-import React, { useState } from 'react'
+import React from 'react'
 
 interface WordToReviewProps {
     currentWord: WordType
@@ -18,19 +18,19 @@ const WordToReview = ({ currentWord, isRevealed, handleRevealed, handleVoice }: 
                                 border-border rounded-lg bg-card relative min-h-[280px] 
                                 ${isRevealed ? "" : "hover:translate-y-[-5px] duration-150 hover:shadow-lg cursor-pointer"} `}
         >
-            <p className='tracking-wider text-[#C8C5C0] text-sm uppercase mb-4'>
+            <p className='tracking-wider text-subtle text-sm uppercase mb-4'>
                 {isRevealed ? 'meaning' : 'tap to reveal'}
             </p>
-            <div onClick={handleVoice} className='absolute top-4 right-4 p-2 rounded-sm bg-gray-100 text-muted cursor-pointer hover:translate-y-[-5px] duration-150 hover:shadow-lg hover:bg-orange-300 hover:text-white'>
+            <div onClick={handleVoice} className='absolute top-4 right-4 p-2 rounded-sm bg-surface text-muted cursor-pointer hover:translate-y-[-5px] duration-150 hover:shadow-lg hover:bg-accent hover:text-primary-foreground'>
                 <Volume2 />
             </div>
             <p className='text-foreground text-[38px] font-lora'>{currentWord?.word}</p>
-            {isRevealed && <p className='text-[#4a4845] text-[16px] mt-4'>{currentWord?.meaning}</p>}
-            {isRevealed && <p className='text-[#B0ACA8] text-[14px] italic mt-3'>{currentWord?.example[0]}</p>}
+            {isRevealed && <p className='text-foreground text-[16px] mt-4'>{currentWord?.meaning}</p>}
+            {isRevealed && <p className='text-subtle text-[14px] italic mt-3'>{currentWord?.example[0]}</p>}
             <div className='absolute bottom-4 flex gap-1'>
-                <span className='w-1.5 h-1.5 rounded-full bg-[#e0ddd8]'></span>
-                <span className='w-1.5 h-1.5 rounded-full bg-[#e0ddd8]'></span>
-                <span className='w-1.5 h-1.5 rounded-full bg-[#e0ddd8]'></span>
+                <span className='w-1.5 h-1.5 rounded-full bg-border'></span>
+                <span className='w-1.5 h-1.5 rounded-full bg-border'></span>
+                <span className='w-1.5 h-1.5 rounded-full bg-border'></span>
             </div>
         </div>
     )

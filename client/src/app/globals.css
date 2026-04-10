@@ -5,19 +5,19 @@
 @custom-variant dark (&:is(.dark *));
 
 /* =========================
-   DESIGN TOKENS
+   DESIGN TOKENS (default = violet-light)
 ========================= */
 :root {
-  /* COLORS */
-  --background: #F7F5F0;
-  --foreground: #1A1B16;
-  --accent: #f97316;
-  --danger: #B8773A;
-  --muted: #8A8680;
-  --border: #E0D8D0;
-  --card: #FFFFFF;
+  --background: #faf5ff;
+  --foreground: #1a0a2e;
+  --muted: #7c3aed;
+  --border: #ddd6fe;
+  --accent: #7c3aed;
 
-  /* SPACING */
+  --card: #ffffff;
+  --danger: #dc2626;
+  --success: #15803d;
+
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -25,42 +25,112 @@
   --space-6: 24px;
   --space-10: 40px;
 
-  /* RADIUS */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
 
-  /* FONT */
   --font-sans: "DM Sans", Arial, Helvetica, sans-serif;
   --font-lora: "Lora", Arial, Helvetica, sans-serif;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+
+  --card-foreground: var(--foreground);
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+  --secondary: color-mix(in srgb, var(--foreground) 6%, var(--background));
+  --secondary-foreground: var(--foreground);
+  --muted-foreground: color-mix(in srgb, var(--foreground) 55%, var(--background));
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.577 0.245 27.325);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --input: color-mix(in srgb, var(--border) 65%, var(--background));
+  --ring: var(--accent);
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: var(--card);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: color-mix(in srgb, var(--accent) 10%, var(--background));
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--accent);
+}
+
+html {
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--background));
+  --accent-hover: color-mix(in srgb, var(--accent) 75%, var(--foreground));
+  --subtle: color-mix(in srgb, var(--foreground) 58%, var(--background));
+  --surface: color-mix(in srgb, var(--background) 92%, var(--foreground));
+  --success-soft: color-mix(in srgb, var(--success) 14%, var(--background));
+  --success-border: color-mix(in srgb, var(--success) 32%, var(--border));
+  --danger-soft: color-mix(in srgb, var(--danger) 12%, var(--background));
+  --danger-border: color-mix(in srgb, var(--danger) 28%, var(--border));
+  --danger-hover: color-mix(in srgb, var(--danger-soft) 75%, var(--danger));
+}
+
+[data-theme="violet-light"] {
+  --background: #fcfaff;
+  /* Trắng pha tím cực nhẹ */
+  --foreground: #1a0a2e;
+  --muted: #6b7280;
+  /* Xám trung tính để phân cấp nội dung */
+  --border: #f1ecfe;
+  /* Border rất mảnh */
+  --accent: #7c3aed;
+  /* Màu nhấn tím rực rỡ */
+  --card: #ffffff;
+}
+
+[data-theme="violet-dark"] {
+  --background: #090412;
+  /* Sâu hơn, huyền bí hơn */
+  --foreground: #f5f3ff;
+  --muted: #94a3b8;
+  --border: #1e1033;
+  --accent: #a78bfa;
+  --card: #120921;
+}
+
+/* Tông Hồng (Pink) - Tươi mới, hiện đại */
+[data-theme="pink-light"] {
+  --background: #fffafa;
+  --foreground: #3b0018;
+  --muted: #71717a;
+  --border: #fceef5;
+  --accent: #ec4899;
+  --card: #ffffff;
+}
+
+[data-theme="pink-dark"] {
+  --background: #0f0009;
+  --foreground: #fff1f2;
+  --muted: #9ca3af;
+  --border: #310518;
+  --accent: #f472b6;
+  --card: #1a0512;
+}
+
+/* Tông Xanh (Blue) - Sạch sẽ, tin cậy */
+[data-theme="blue-light"] {
+  --background: #f8fbff;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --border: #eef5ff;
+  --accent: #2563eb;
+  --card: #ffffff;
+}
+
+[data-theme="blue-dark"] {
+  --background: #020617;
+  --foreground: #f1f5f9;
+  --muted: #94a3b8;
+  --border: #1e293b;
+  --accent: #3b82f6;
+  --card: #0f172a;
 }
 
 /* =========================
@@ -70,10 +140,20 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-hover: var(--accent-hover);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-border: var(--danger-border);
+  --color-danger-hover: var(--danger-hover);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-success-border: var(--success-border);
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-card: var(--card);
+  --color-subtle: var(--subtle);
+  --color-surface: var(--surface);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -120,7 +200,7 @@ body {
 }
 
 /* =========================
-   CUSTOM UTILITIES (CỰC QUAN TRỌNG)
+   CUSTOM UTILITIES
 ========================= */
 @layer utilities {
   .card {
@@ -133,14 +213,8 @@ body {
     color: var(--muted);
   }
 
-  .bg-accent {
-    background: var(--accent);
-    color: white;
-  }
-
-  .bg-danger {
-    background: var(--danger);
-    color: white;
+  .text-subtle {
+    color: var(--subtle);
   }
 
   .section {
@@ -149,9 +223,6 @@ body {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
@@ -186,9 +257,11 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }

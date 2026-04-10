@@ -21,31 +21,31 @@ const RegisterPage = () => {
     console.log(data)
   }
   return (
-    <div className='py-12 px-16 flex items-center justify-center w-full bg-[#f7f5f0]'>
+    <div className='py-12 px-16 flex items-center justify-center w-full bg-background'>
       <div className='w-full max-w-[360px]'>
         <h1 className='font-lora text-[26px] text-foreground font-normal mb-[6px]'>Create account</h1>
-        <p className=' text-[#b0aca8] text-[12px] mb-7'>Free for now, but i don't know future plans</p>
+        <p className='text-subtle text-[12px] mb-7'>Free for now, but i don't know future plans</p>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className='flex flex-col gap-2 mb-5'>
             <label htmlFor="name" className='text-[12px] text-muted uppercase tracking-widest'>name</label>
-            <input type="text" id="name" className='py-[13.6px] placeholder:text-gray-400 px-4 border-[0.5px] border-border rounded-[14px] focus:border-accent focus:outline-none' placeholder='Enter your name' {...register("name")} />
-            {errors.name && <p className='text-red-500'>{errors.name.message}</p>}
+            <input type="text" id="name" className='py-[13.6px] placeholder:text-subtle px-4 border-[0.5px] border-border rounded-[14px] focus:border-accent focus:outline-none bg-card' placeholder='Enter your name' {...register("name")} />
+            {errors.name && <p className='text-destructive'>{errors.name.message}</p>}
           </div>
           <div className='flex flex-col gap-2 mb-5'>
             <label htmlFor="email" className='text-[12px] text-muted uppercase tracking-widest'>email</label>
-            <input type="email" id="email" className='py-[13.6px] placeholder:text-gray-400 px-4 border-[0.5px] border-border rounded-[14px] focus:border-accent focus:outline-none' placeholder='Enter your email' {...register("email")} />
-            {errors.email && <p className='text-red-500'>{errors.email.message}</p>}
+            <input type="email" id="email" className='py-[13.6px] placeholder:text-subtle px-4 border-[0.5px] border-border rounded-[14px] focus:border-accent focus:outline-none bg-card' placeholder='Enter your email' {...register("email")} />
+            {errors.email && <p className='text-destructive'>{errors.email.message}</p>}
           </div>
           <div className='flex flex-col gap-2 mb-5'>
             <label htmlFor="password" className='text-[12px] text-muted uppercase tracking-widest'>password</label>
-            <input type="password" id="password" className='py-[13.6px] placeholder:text-gray-400 px-4 border-[0.5px] border-border rounded-[14px] focus:border-accent focus:outline-none' placeholder='Enter your password' {...register("password")} />
-            {errors.password && <p className='text-red-500'>{errors.password.message}</p>}
+            <input type="password" id="password" className='py-[13.6px] placeholder:text-subtle px-4 border-[0.5px] border-border rounded-[14px] focus:border-accent focus:outline-none bg-card' placeholder='Enter your password' {...register("password")} />
+            {errors.password && <p className='text-destructive'>{errors.password.message}</p>}
           </div>
-          <ButtonCustom icon={<MoveRight />} type='submit' title='Create account' className='bg-foreground text-white transition-transform hover:bg-[#2E2C2A]  hover:-translate-y-0.5 duration-150' />
+          <ButtonCustom icon={<MoveRight />} type='submit' title='Create account' className='bg-foreground text-primary-foreground transition-transform hover:opacity-90 hover:-translate-y-0.5 duration-150' />
         </form>
         <div className='mt-3.5 text-center'>
-          <p className='text-[#b0aca8] text-[12px]'>Already have an account?
-            <Link className='text-[#5c8b6e] ' href="/login"> Sign in</Link>
+          <p className='text-subtle text-[12px]'>Already have an account?
+            <Link className='text-accent font-medium hover:underline ' href="/login"> Sign in</Link>
           </p>
         </div>
 

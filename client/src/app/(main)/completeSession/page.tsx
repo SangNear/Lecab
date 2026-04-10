@@ -9,7 +9,7 @@ const SessionCompletePage = () => {
             <h2 className='font-lora text-[28.8px] mb-2 text-foreground'>All done for today</h2>
             <p className='text-center text-[14.8px] text-muted font-weight-[300] tracking-wider'>You reviewed 11 words. <br /> Come back tomorrow for your next session.</p>
             <ButtonCustom
-                className='bg-foreground text-white transition-transform hover:bg-[#2E2C2A] hover:-translate-y-0.5 duration-150 mt-8'
+                className='bg-foreground text-primary-foreground transition-transform hover:opacity-90 hover:-translate-y-0.5 duration-150 mt-8'
                 title='Back to dashboard '
                 redirectTo={true}
                 redirectToPath="/"

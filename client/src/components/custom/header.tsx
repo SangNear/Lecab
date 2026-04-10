@@ -1,35 +1,28 @@
-"use client"
+"use client";
 
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import Image from 'next/image'
-import Link from 'next/link'
-import { useEffect } from 'react'
-import ButtonCustom from './buttonCustom'
-import { clearCredentials } from '@/store/slices/authSlices'
-import { Button } from '@/components/ui/button'
-import { useLogoutMutation } from '@/store/api/authApi'
-import { useRouter } from 'next/navigation'
-import { Bell, Plus, SeparatorHorizontal } from 'lucide-react'
+import Link from "next/link";
+import { Bell, Plus } from "lucide-react";
+import ThemeSwitcher from "./theme-switcher";
+
 const HeaderComponent = () => {
-    const user = useAppSelector((state) => state.auth.user)
-    const [logout, { isLoading }] = useLogoutMutation()
-    const dispatch = useAppDispatch()
-    const router = useRouter()
-    return (
-        <header className='bg-white h-20  lg:px-20 px-10  flex items-center justify-between  w-full  '>
-            <p className='text-lg font-lora italic font-bold'>Tổng quan học tập</p>
-            <div className='flex items-center gap-2'>
-                <Link href='/add-a-word' className='flex items-center gap-2 py-1 px-2 md:py-2.5 md:px-5 bg-orange-500 text-white rounded-md font-semibold tracking-tighter hover:bg-orange-600 transition-all duration-300'>
-                    <Plus />
-                    <span className='hidden md:block'>Thêm từ</span>
-                </Link>
-                <span className='px-2'>|</span>
-                <Bell />
-            </div>
-            
+  return (
+    <header className="flex h-20 w-full items-center justify-between border-b border-border bg-card px-10 lg:px-20">
+      <p className="font-lora text-lg font-bold italic">Tổng quan học tập</p>
 
-        </header>
-    )
-}
+      <div className="flex items-center gap-2">
+        <ThemeSwitcher />
+        <Link
+          href="/add-a-word"
+          className="flex items-center gap-2 rounded-md bg-accent px-2 py-1 font-semibold tracking-tighter text-primary-foreground transition-all duration-300 hover:bg-accent-hover md:px-5 md:py-2.5"
+        >
+          <Plus className="h-4 w-4" />
+          <span className="hidden md:block">Thêm từ</span>
+        </Link>
+        <span className="px-2 text-subtle">|</span>
+        <Bell className="h-5 w-5 text-foreground" />
+      </div>
+    </header>
+  );
+};
 
-export default HeaderComponent
+export default HeaderComponent;

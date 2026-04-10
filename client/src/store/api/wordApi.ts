@@ -46,8 +46,8 @@ interface SynonymExample {
 }
 
 export interface SynonymGroup {
-        sense: string; // context_description_in_english
-        synonyms: SynonymExample[];
+    sense: string; // context_description_in_english
+    synonyms: SynonymExample[];
 }
 
 interface SynonymResponse {
@@ -95,13 +95,13 @@ export const wordApi = createApi({
                 return response?.data ?? [];
             }
         }),
-        updateWordReview: builder.mutation<WordType, { wordId: string, performance: "again" | "easy" }>({
-            query: ({ wordId, performance }) => ({
+        updateWordReview: builder.mutation<WordType, { wordId: string, performance: "again" | "easy", duration: number }>({
+            query: ({ wordId, performance, duration }) => ({
                 url: "word/update-word-review",
                 method: "POST",
-                body: { wordId, performance },
+                body: { wordId, performance, duration },
             }),
-            invalidatesTags: ['wordsToReview', 'words']
+            
         }),
         getSynonyms: builder.query<SynonymGroup[], { wordId: string }>({
             query: ({ wordId }) => ({

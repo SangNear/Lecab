@@ -5,6 +5,7 @@ import { store } from "@/store/index";
 import { useEffect, useState } from "react";
 import { setCredentials } from "@/store/slices/authSlices";
 import { apiRoot } from "@/config/api";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +52,9 @@ const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <Provider store={store}>
-            <AuthInitializer>{children}</AuthInitializer>
+            <ThemeProvider>
+                <AuthInitializer>{children}</AuthInitializer>
+            </ThemeProvider>
         </Provider>
     )
 }

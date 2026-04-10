@@ -31,9 +31,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="violet-light" suppressHydrationWarning>
       <body
-        className={`${lora.variable} ${inter.variable} bg-[#ffffff] 
+        className={`${lora.variable} ${inter.variable} bg-background 
         text-foreground 
         font-sans 
         antialiased

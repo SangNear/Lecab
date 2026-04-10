@@ -11,9 +11,10 @@ interface ButtonCustomProps {
     redirectToPath?: string
     description?: string
     onClick?: () => void
+    disabled?: boolean
 }
 
-const ButtonCustom = ({ title, redirectTo, icon, className, type = "button", redirectToPath, description, onClick }: ButtonCustomProps) => {
+const ButtonCustom = ({ title, redirectTo, icon, className, type = "button", redirectToPath, description, onClick, disabled }: ButtonCustomProps) => {
     const router = useRouter()
 
     return (
@@ -22,7 +23,7 @@ const ButtonCustom = ({ title, redirectTo, icon, className, type = "button", red
                 {title} {icon && <span className='ml-2'>{icon}</span>}
             </div>
 
-            {description && <p className='text-xs text-gray-400 font-sans font-weight-[300] tracking-wider'>{description}</p>}
+            {description && <p className='text-xs text-subtle font-sans font-weight-[300] tracking-wider'>{description}</p>}
         </button>
     )
 }
