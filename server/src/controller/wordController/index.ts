@@ -202,6 +202,8 @@ export async function updateWordReview(req: Request, res: Response) {
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
         const { wordId, performance, duration } = req.body;
+
+        if (!wordId || !performance || !duration) return res.status(400).json({ message: "Missing required fields" });
         
         const word = await prisma.word.findUnique({
             where: { id: wordId, userId: userId },
