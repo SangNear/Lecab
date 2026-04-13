@@ -10,9 +10,7 @@ const SynonymComponent = ({ synonyms }: { synonyms: SynonymGroup[] }) => {
 
             <div className="space-y-1">
                 <h4 className="text-2xl font-lora text-foreground">Từ đồng nghĩa</h4>
-
             </div>
-
             {synonyms.map((synonym) => (
                 <section className="space-y-4" key={synonym.sense}>
                     <div className="flex items-center gap-3">
@@ -30,28 +28,18 @@ const SynonymComponent = ({ synonyms }: { synonyms: SynonymGroup[] }) => {
                                         <span className="text-[10px] text-subtle font-medium bg-surface px-1.5 py-0.5 rounded">{item.register}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
-
                                         <span className="text-[12px] text-subtle ml-1">Thông dụng</span>
                                     </div>
                                 </div>
-
                             </div>
-
                             <p className="text-xs text-subtle mb-3 italic leading-relaxed group-hover:text-foreground transition-colors">
                                 {item.meaning}
                             </p>
-
-
                         </div>
                     ))}
-
-
-
                 </section>
             ))
             }
-
-
         </div >
     )
 }

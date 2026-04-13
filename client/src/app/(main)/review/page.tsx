@@ -116,7 +116,7 @@ const ReviewPage = () => {
 
                         </div>
                     </div>
-                    <SynonymComponent synonyms={synonymsData} />
+                    
                 </>
             ) : (
                 <EmptyReview />

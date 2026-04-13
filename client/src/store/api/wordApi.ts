@@ -59,6 +59,22 @@ interface GetSynonymsApiResponse {
     success?: boolean;
     data?: SynonymResponse | null;
 }
+interface WordDetail {
+    pronunciation: string;
+    cefrLevel: string;
+    collocations: string[];
+    definitions: AIDefinition[];
+    synonyms: AISynonym[];
+}
+interface AIDefinition {
+    context: string;
+    exampleEn: string;
+    exampleVi: string;
+}
+interface AISynonym {
+    meaningEn: string;
+    meaningVi: string;
+}
 export const wordApi = createApi({
     reducerPath: "wordApi",
     baseQuery: baseQueryWithReauth,
@@ -72,17 +88,14 @@ export const wordApi = createApi({
             }),
             invalidatesTags: ['words', 'wordsToReview']
         }),
-        getWords: builder.query<WordType[], void>({
+        getWords: builder.query<GetWordsResponse, void>({
             query: () => ({
                 url: "word/get-words",
                 method: "GET",
             }),
             providesTags: ['words'],
-            transformResponse: (response: GetWordsResponse | WordType[]) => {
-                if (Array.isArray(response)) return response;
-                return response?.data ?? [];
-            },
-
+            
+            
         }),
         getWordsToReview: builder.query<WordType[], void>({
             query: () => ({
@@ -112,8 +125,17 @@ export const wordApi = createApi({
             transformResponse: (response: GetSynonymsApiResponse) => {
                 return response?.data?.synonyms_groups ?? [];
             }
-        })
+        }),
 
+        getWordDetail: builder.query<WordDetail, {wordParams: string}>({
+            query: ({wordParams}) => ({
+                url: `word/generate-word-detail/${encodeURIComponent(wordParams)}`,
+                method: "GET",
+            }),
+            transformResponse: (response: WordDetail) => {
+                return response;
+            }
+        })
     })
 })
-export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery } = wordApi;
+export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery, useGetWordDetailQuery } = wordApi;
