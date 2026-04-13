@@ -26,8 +26,6 @@ enum CefrLevel {
   C2
 }
 
-
-
 model User {
   id        String   @id @default(uuid())
   name      String?
@@ -53,6 +51,7 @@ model Word {
   meaning       String
   example       String[]
   pronunciation String?
+  definitions   Definition[]
 
   cefrLevel CefrLevel @default(A1)
 
@@ -61,11 +60,11 @@ model Word {
   wrongCount   Int @default(0)
 
   easinessFactor Float @default(2.5)
-  intervalDays Int @default(0)
+  intervalDays   Int   @default(0)
 
   // 🎨 UI / trạng thái
 
-  isFavorite Boolean    @default(false)
+  isFavorite Boolean @default(false)
 
   level          Int       @default(0) // mức độ nhớ
   lastReviewedAt DateTime?
@@ -74,11 +73,10 @@ model Word {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  
   reviews      ReviewLog[]
-  collocations Collocation[]
+  collocations String[]    @default([])
   synonyms     Synonym[]
 
   @@unique([userId, word])
@@ -87,10 +85,22 @@ model Word {
   @@map("words")
 }
 
+model Definition {
+  id        String @id @default(uuid())
+  context   String @default("")
+  exampleEn String @default("")
+  exampleVi String @default("")
+
+  wordId String @default("")
+  word   Word   @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  @@map("definitions")
+}
+
 model Synonym {
-  id        String   @id @default(uuid())
-  wordId    String
-  data      Json     // chứa toàn bộ synonyms_groups
+  id        String @id @default(uuid())
+  wordId    String @default("")
+  meaningVi String @default("")
+  meaningEn String @default("")
 
   createdAt DateTime @default(now())
 
@@ -129,21 +139,4 @@ model Session {
 
   @@index([userId, expiresAt])
   @@map("sessions")
-}
-
-model Collocation {
-  id     String @id @default(uuid())
-  wordId String
-
-  collocation String
-  meaning     String
-  example     String
-  type        String
-
-  createdAt DateTime @default(now())
-
-  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
-
-  @@unique([wordId, collocation])
-  @@map("collocations")
 }

@@ -3,58 +3,24 @@ import { GoogleGenAI } from "@google/genai";
 import type { Request, Response } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { CefrLevel } from "../../generated/prisma/client.js";
-import { LEXIS_PROMPT_SYNONYMS } from "../../prompts/index.js";
+import { LEXIS_PROMPT_DICTIONARY, LEXIS_PROMPT_SYNONYMS } from "../../prompts/index.js";
 
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY as string,
 })
 
-
-export async function generateCollocations(req: Request, res: Response) {
-    try {
-        const { word } = req.body;
-        if (!word) {
-            return res.status(400).json({ message: "Word is required" });
-        }
-        const prompt = `Generate 5 natural English collocations for the word "${word}".
-                        Return JSON format:
-                        [
-                            { "collocation": "", "meaning": "", "example": "", "type": "" }
-                        ]
-                        Rules:
-                            - Each collocation MUST be a natural phrase used by native speakers (2–5 words, not just 2 words).
-                            - Prefer full phrases or extended collocations (e.g. "deeply arrogant attitude", "come across as arrogant", "arrogant in the way he speaks").
-                            - Include a mix of patterns:
-                                + adjective + noun phrase
-                                + verb + collocation
-                                + prepositional phrase
-                            - Avoid simple/basic pairs like "arrogant tone".
-                            - Make them sound natural in real conversations.
-                            - Example sentence must use the full collocation naturally.
-                            - "type" should describe the pattern (e.g. "verb phrase", "noun phrase", "prepositional phrase").
-                            - No explanation, only valid JSON.
-                        `
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: prompt
-        })
-
-        // 1. Lấy text từ AI
-        let textResponse = response.text;
-
-        // 2. Dự phòng trường hợp AI tự bọc kết quả trong ```json ... ```
-        textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
-
-        // 3. Chuyển String thành JSON Object rồi mới trả về
-        const jsonResult = JSON.parse(textResponse as string);
-
-        return res.status(200).json(jsonResult);
-    } catch (error) {
-        throw new Error("Invalid JSON from AI");
-    }
+interface AIDefinition {
+    context: string;
+    exampleEn: string;
+    exampleVi: string;
 }
+
+interface AISynonym {
+    word: string;
+    meaningVi: string;
+}
+
 
 export async function addWord(req: Request, res: Response) {
     try {
@@ -84,26 +50,12 @@ export async function addWord(req: Request, res: Response) {
 
             }
         })
-
         if (newWord) {
-
-            const prompt = LEXIS_PROMPT_SYNONYMS(newWord.word).trim();
-            const response = await ai.models.generateContent({
-                model: 'gemma-3-27b-it',
-                contents: prompt
-
-            });
-
-            let textResponse = response.text;
-
-            textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
-
-            const jsonResult = JSON.parse(textResponse as string);
 
             await prisma.synonym.create({
                 data: {
                     wordId: newWord.id,
-                    data: jsonResult
+
                 }
             })
         }
@@ -204,7 +156,7 @@ export async function updateWordReview(req: Request, res: Response) {
         const { wordId, performance, duration } = req.body;
 
         if (!wordId || !performance || !duration) return res.status(400).json({ message: "Missing required fields" });
-        
+
         const word = await prisma.word.findUnique({
             where: { id: wordId, userId: userId },
         });
@@ -228,7 +180,7 @@ export async function updateWordReview(req: Request, res: Response) {
             if (word.intervalDays === 0) newInterval = 1;
             else if (word.intervalDays === 1) newInterval = 3;
             else newInterval = Math.floor(word.intervalDays * newEF);
-            
+
             word.correctCount += 1;
         } else {
             // Trường hợp "Chưa thuộc"
@@ -252,8 +204,8 @@ export async function updateWordReview(req: Request, res: Response) {
         });
 
         // Trả về kết quả cho Client
-        return res.status(200).json({ 
-            nextInterval: updatedWord.intervalDays, 
+        return res.status(200).json({
+            nextInterval: updatedWord.intervalDays,
             nextEF: parseFloat(updatedWord.easinessFactor.toFixed(2)),
             nextReviewDate: updatedWord.nextReviewDate
         });
@@ -302,23 +254,96 @@ export async function generateSynonyms(req: Request, res: Response) {
         return res.status(500).json({ message: "Lỗi server nội bộ." });
     }
 }
-export async function getSynonyms(req: Request, res: Response) {
+
+
+export async function generateWordDetail(req: Request, res: Response) {
     try {
         const userId = req.user?.userId;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
-        const wordId = req.query.wordId;
-        if (!wordId || typeof wordId !== "string") {
-            return res.status(400).json({ message: "Word ID is required" });
-        }
+        const { wordParams } = req.params;
+        if (!wordParams) return res.status(400).json({ message: "Word is required" });
 
-        const synonyms = await prisma.synonym.findMany({
-            where: {
-                wordId: wordId,
-            },
+        let wordDetail = await prisma.word.findFirst({
+            where: { word: wordParams as string },
+            select: {
+                id: true,
+                pronunciation: true,
+                cefrLevel: true,
+                collocations: true,
+                definitions: true,
+                synonyms: true,
+            }
         });
-        return res.status(200).json({ success: true, data: synonyms[0]?.data });
-    } catch (error) {
-        console.error("Error in getSynonyms:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
+
+
+        const hasValidDefinition = wordDetail?.definitions.some(
+            d => d.context || d.exampleEn || d.exampleVi
+        );
+
+        if (hasValidDefinition) return res.status(200).json(wordDetail);
+
+
+        const prompt = LEXIS_PROMPT_DICTIONARY(wordParams as string).trim();
+        const response = await ai.models.generateContent({
+            model: 'gemma-3-27b-it',
+            contents: prompt
+        });
+
+        let textResponse = response.text;
+        textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
+        const jsonResult = JSON.parse(textResponse as string);
+
+
+        await prisma.definition.deleteMany({
+            where: { wordId: wordDetail?.id as string }
+        });
+        await prisma.synonym.deleteMany({
+            where: { wordId: wordDetail?.id as string }
+        });
+
+
+        await prisma.definition.createMany({
+            data: jsonResult.definitions.map((def: AIDefinition) => ({
+                wordId: wordDetail?.id as string,
+                context: def.context ?? "",
+                exampleEn: def.exampleEn ?? "",
+                exampleVi: def.exampleVi ?? "",
+            }))
+        });
+
+
+        await prisma.synonym.createMany({
+            data: jsonResult.synonyms.map((syn: AISynonym) => ({
+                wordId: wordDetail?.id as string,
+                meaningVi: syn.meaningVi ?? "",
+                meaningEn: syn.word ?? "",  
+            }))
+        });
+
+        
+        await prisma.word.update({
+            where: { id: wordDetail?.id as string },
+            data: {
+                pronunciation: jsonResult.pronunciation,
+                collocations: jsonResult.collocations,
+            }
+        });
+
+        const finalData = await prisma.word.findUnique({
+            where: { id: wordDetail?.id as string },
+            select: {
+                pronunciation: true,
+                cefrLevel: true,
+                collocations: true,
+                definitions: true,
+                synonyms: true,
+            }
+        });
+
+        return res.status(200).json(finalData);
+
+    } catch (error: any) {
+        console.error("Error in generateWordDetail:", error);
+        return res.status(500).json({ message: "Internal Server Errors!", error: error.message });
     }
 }
