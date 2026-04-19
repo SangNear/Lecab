@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai";
 import type { Request, Response } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { CefrLevel } from "../../generated/prisma/client.js";
-import { LEXIS_PROMPT_DICTIONARY, LEXIS_PROMPT_SYNONYMS } from "../../prompts/index.js";
+import { LEXIS_PROMPT_DICTIONARY, LEXIS_PROMPT_STORY, LEXIS_PROMPT_SYNONYMS } from "../../prompts/index.js";
 
 
 const ai = new GoogleGenAI({
@@ -216,44 +216,7 @@ export async function updateWordReview(req: Request, res: Response) {
     }
 }
 
-export async function generateSynonyms(req: Request, res: Response) {
-    try {
-        const userId = req.user?.userId;
-        if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-        const { word } = req.body;
-        if (!word) return res.status(400).json({ message: "Word is required" });
-
-        const prompt = LEXIS_PROMPT_SYNONYMS(word).trim();
-
-
-        const response = await ai.models.generateContent({
-            model: 'gemma-3-27b-it',
-            contents: prompt
-
-        });
-
-        let textResponse = response.text;
-
-        textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
-
-
-        const jsonResult = JSON.parse(textResponse as string);
-
-        return res.status(200).json(jsonResult);
-
-    } catch (error: any) {
-        console.error("Error in generateSynonyms:", error);
-
-        if (error.status === 503 || error.status === 429) {
-            return res.status(503).json({
-                message: "Dịch vụ đang quá tải, thử lại sau vài giây nhé!"
-            });
-        }
-
-        return res.status(500).json({ message: "Lỗi server nội bộ." });
-    }
-}
 
 
 export async function generateWordDetail(req: Request, res: Response) {
@@ -316,11 +279,11 @@ export async function generateWordDetail(req: Request, res: Response) {
             data: jsonResult.synonyms.map((syn: AISynonym) => ({
                 wordId: wordDetail?.id as string,
                 meaningVi: syn.meaningVi ?? "",
-                meaningEn: syn.word ?? "",  
+                meaningEn: syn.word ?? "",
             }))
         });
 
-        
+
         await prisma.word.update({
             where: { id: wordDetail?.id as string },
             data: {
@@ -344,6 +307,31 @@ export async function generateWordDetail(req: Request, res: Response) {
 
     } catch (error: any) {
         console.error("Error in generateWordDetail:", error);
+        return res.status(500).json({ message: "Internal Server Errors!", error: error.message });
+    }
+}
+export async function generateStory(req: Request, res: Response) {
+    try {
+        const userId = req.user?.userId;
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+        const { topic, tone, level, vocabList } = req.body;
+
+        if (!topic || !tone || !level || !vocabList) return res.status(400).json({ message: "Missing required fields" });
+
+        const prompt = LEXIS_PROMPT_STORY(topic, tone, level, vocabList).trim();
+        const response = await ai.models.generateContent({
+            model: 'gemma-3-27b-it',
+            contents: prompt
+        });
+
+        let textResponse = response.text;
+        textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
+        const jsonResult = JSON.parse(textResponse as string);
+
+        return res.status(200).json(jsonResult);
+    } catch (error: any) {
+        console.error("Error in generateStory:", error);
         return res.status(500).json({ message: "Internal Server Errors!", error: error.message });
     }
 }
