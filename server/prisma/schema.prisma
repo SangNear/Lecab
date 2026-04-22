@@ -86,13 +86,14 @@ model Word {
 }
 
 model Definition {
-  id        String @id @default(uuid())
-  context   String @default("")
-  exampleEn String @default("")
-  exampleVi String @default("")
+  id           String @id @default(uuid())
+  context      String @default("")
+  exampleEn    String @default("")
+  exampleVi    String @default("")
+  partOfSpeech String @default("")
+  wordId       String @default("")
+  word         Word   @relation(fields: [wordId], references: [id], onDelete: Cascade)
 
-  wordId String @default("")
-  word   Word   @relation(fields: [wordId], references: [id], onDelete: Cascade)
   @@map("definitions")
 }
 

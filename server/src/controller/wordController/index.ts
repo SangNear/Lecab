@@ -4,23 +4,12 @@ import type { Request, Response } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { CefrLevel } from "../../generated/prisma/client.js";
 import { LEXIS_PROMPT_DICTIONARY, LEXIS_PROMPT_STORY, LEXIS_PROMPT_SYNONYMS } from "../../prompts/index.js";
+import type { Definition, LexisDictionaryResponse, Synonym } from "../../types/index.js";
 
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY as string,
 })
-
-interface AIDefinition {
-    context: string;
-    exampleEn: string;
-    exampleVi: string;
-}
-
-interface AISynonym {
-    word: string;
-    meaningVi: string;
-}
-
 
 export async function addWord(req: Request, res: Response) {
     try {
@@ -227,7 +216,10 @@ export async function generateWordDetail(req: Request, res: Response) {
         if (!wordParams) return res.status(400).json({ message: "Word is required" });
 
         let wordDetail = await prisma.word.findFirst({
-            where: { word: wordParams as string },
+            where: {
+                word: wordParams as string,
+                userId
+            },
             select: {
                 id: true,
                 pronunciation: true,
@@ -238,13 +230,20 @@ export async function generateWordDetail(req: Request, res: Response) {
             }
         });
 
+        if (!wordDetail) {
+            return res.status(404).json({ message: "Word not found or not belong to you" });
+        }
 
         const hasValidDefinition = wordDetail?.definitions.some(
             d => d.context || d.exampleEn || d.exampleVi
         );
 
-        if (hasValidDefinition) return res.status(200).json(wordDetail);
+        if (hasValidDefinition)
+            return res.status(200).json(wordDetail);
 
+
+
+        const wordId = wordDetail.id
 
         const prompt = LEXIS_PROMPT_DICTIONARY(wordParams as string).trim();
         const response = await ai.models.generateContent({
@@ -254,53 +253,46 @@ export async function generateWordDetail(req: Request, res: Response) {
 
         let textResponse = response.text;
         textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
-        const jsonResult = JSON.parse(textResponse as string);
+        const jsonResult: LexisDictionaryResponse = JSON.parse(textResponse as string);
 
 
-        await prisma.definition.deleteMany({
-            where: { wordId: wordDetail?.id as string }
-        });
-        await prisma.synonym.deleteMany({
-            where: { wordId: wordDetail?.id as string }
-        });
+        const finalData = await prisma.$transaction(async (tx) => {
+            await tx.definition.deleteMany({ where: { wordId } });
+            await tx.synonym.deleteMany({ where: { wordId } });
 
+            await tx.definition.createMany({
+                data: jsonResult.definitions.map((def: Definition) => ({
+                    wordId,
+                    context: def.context ?? "",
+                    exampleEn: def.exampleEn ?? "",
+                    exampleVi: def.exampleVi ?? "",
+                    partOfSpeech: def.partOfSpeech ?? ""
+                }))
+            });
 
-        await prisma.definition.createMany({
-            data: jsonResult.definitions.map((def: AIDefinition) => ({
-                wordId: wordDetail?.id as string,
-                context: def.context ?? "",
-                exampleEn: def.exampleEn ?? "",
-                exampleVi: def.exampleVi ?? "",
-            }))
-        });
+            await tx.synonym.createMany({
+                data: jsonResult.synonyms.map((syn: Synonym) => ({
+                    wordId,
+                    meaningVi: syn.meaningVi ?? "",
+                    meaningEn: syn.word ?? "",
+                }))
+            });
 
-
-        await prisma.synonym.createMany({
-            data: jsonResult.synonyms.map((syn: AISynonym) => ({
-                wordId: wordDetail?.id as string,
-                meaningVi: syn.meaningVi ?? "",
-                meaningEn: syn.word ?? "",
-            }))
-        });
-
-
-        await prisma.word.update({
-            where: { id: wordDetail?.id as string },
-            data: {
-                pronunciation: jsonResult.pronunciation,
-                collocations: jsonResult.collocations,
-            }
-        });
-
-        const finalData = await prisma.word.findUnique({
-            where: { id: wordDetail?.id as string },
-            select: {
-                pronunciation: true,
-                cefrLevel: true,
-                collocations: true,
-                definitions: true,
-                synonyms: true,
-            }
+            return tx.word.update({
+                where: { id: wordId },
+                data: {
+                    pronunciation: jsonResult.pronunciation,
+                    collocations: jsonResult.collocations,
+                    cefrLevel: jsonResult.cefrLevel as CefrLevel
+                },
+                select: {
+                    pronunciation: true,
+                    cefrLevel: true,
+                    collocations: true,
+                    definitions: true,
+                    synonyms: true,
+                }
+            });
         });
 
         return res.status(200).json(finalData);

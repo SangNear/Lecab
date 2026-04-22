@@ -67,6 +67,7 @@ interface WordDetail {
     synonyms: AISynonym[];
 }
 interface AIDefinition {
+    partOfSpeech: string;
     context: string;
     exampleEn: string;
     exampleVi: string;
@@ -74,6 +75,12 @@ interface AIDefinition {
 interface AISynonym {
     meaningEn: string;
     meaningVi: string;
+}
+interface GetWordsParams {
+    page?: number;
+    limit?: number;
+    cefrLevel?: string;
+    search?: string;
 }
 export const wordApi = createApi({
     reducerPath: "wordApi",
@@ -88,14 +95,13 @@ export const wordApi = createApi({
             }),
             invalidatesTags: ['words', 'wordsToReview']
         }),
-        getWords: builder.query<GetWordsResponse, void>({
-            query: () => ({
+        getWords: builder.query<GetWordsResponse, GetWordsParams>({
+            query: ({ page = 1, limit = 12, cefrLevel, search } = {}) => ({
                 url: "word/get-words",
                 method: "GET",
+                params: { page, limit, cefrLevel: cefrLevel === 'all' ? undefined : cefrLevel, search: search ?? undefined },
             }),
             providesTags: ['words'],
-            
-            
         }),
         getWordsToReview: builder.query<WordType[], void>({
             query: () => ({
@@ -114,7 +120,7 @@ export const wordApi = createApi({
                 method: "POST",
                 body: { wordId, performance, duration },
             }),
-            
+
         }),
         getSynonyms: builder.query<SynonymGroup[], { wordId: string }>({
             query: ({ wordId }) => ({
@@ -127,8 +133,8 @@ export const wordApi = createApi({
             }
         }),
 
-        getWordDetail: builder.query<WordDetail, {wordParams: string}>({
-            query: ({wordParams}) => ({
+        getWordDetail: builder.query<WordDetail, { wordParams: string }>({
+            query: ({ wordParams }) => ({
                 url: `word/generate-word-detail/${encodeURIComponent(wordParams)}`,
                 method: "GET",
             }),

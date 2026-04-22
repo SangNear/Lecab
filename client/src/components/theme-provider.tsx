@@ -10,12 +10,8 @@ import {
 } from "react";
 
 export const THEMES = [
-  { id: "violet-light", label: "Tím · Sáng" },
-  { id: "violet-dark", label: "Tím · Tối" },
-  { id: "pink-light", label: "Hồng · Sáng" },
-  { id: "pink-dark", label: "Hồng · Tối" },
-  { id: "blue-light", label: "Xanh · Sáng" },
-  { id: "blue-dark", label: "Xanh · Tối" },
+  { id: "light", label: "Sáng" },
+  { id: "dark", label: "Tối" },
 ] as const;
 
 export type ThemeId = (typeof THEMES)[number]["id"];
@@ -42,11 +38,11 @@ function isThemeId(value: string | null): value is ThemeId {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeId>("violet-light");
+  const [theme, setThemeState] = useState<ThemeId>("light");
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    const next = isThemeId(stored) ? stored : "violet-light";
+    const next = isThemeId(stored) ? stored : "light";
     document.documentElement.setAttribute("data-theme", next);
     setThemeState(next);
   }, []);

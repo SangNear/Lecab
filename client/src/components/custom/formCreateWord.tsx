@@ -7,6 +7,8 @@ import { useCreateWordMutation } from '@/store/api/wordApi'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { useAppDispatch } from '@/store/hooks'
+import { setHighlightNewWord } from '@/store/slices/wordSlices'
 
 const wordSchema = z.object({
     word: z.string().min(1, { message: "Word is required" }),
@@ -16,6 +18,7 @@ const wordSchema = z.object({
 
 type WordFormValues = z.infer<typeof wordSchema>
 const formCreateWord = () => {
+    const dispatch = useAppDispatch()
     const router = useRouter()
     const [createWord, { isLoading, error }] = useCreateWordMutation()
     const { register, handleSubmit, formState: { errors } } = useForm<WordFormValues>({
@@ -36,6 +39,7 @@ const formCreateWord = () => {
 
         console.log(payload)
         await createWord(payload).unwrap().then((res) => {
+            dispatch(setHighlightNewWord(data.word))
             router.push("/library")
             toast.success("Word added successfully")
         }).catch(() => {
@@ -43,7 +47,7 @@ const formCreateWord = () => {
         })
     }
     return (
-        <form className='bg-card px-4 py-12 md:px-12  rounded-[4rem] border border-border shadow-sm space-y-10 mt-16' onSubmit={handleSubmit(onSubmit)}>
+        <form className='bg-card px-4 py-12 md:px-12  rounded-lg border border-border shadow-sm space-y-10 mt-16 max-w-2xl mx-auto' onSubmit={handleSubmit(onSubmit)}>
             <div className='flex flex-col gap-2 mb-5'>
                 <label htmlFor="" className='text-[12px] uppercase  font-black text-subtle tracking-widest'>Từ vựng / cụm từ</label>
                 <input

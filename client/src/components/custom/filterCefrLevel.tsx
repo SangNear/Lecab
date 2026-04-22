@@ -23,7 +23,7 @@ const FilterCefrLevel = ({ activeFilterUI }: FilterCefrLevelProps) => {
                         <motion.div
                             layoutId="active-pill"
                             className="absolute inset-0 bg-accent rounded-xl"
-                            transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                            
                         />
                     )}
                     {/* Text */}

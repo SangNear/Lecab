@@ -1,15 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface WordUIState {
-  totalItems: number;
+
   currentPage: number;
   activeFilter: string; // 'all', 'B1', 'B2', 'C1'
+  searchStore: string;
+  highlightNewWord: string
 }
 
 const initialState: WordUIState = {
-  totalItems: 0,
+
   currentPage: 1,
   activeFilter: 'all',
+  searchStore: '',
+  highlightNewWord: '',
 };
 
 const wordSlice = createSlice({
@@ -23,12 +27,17 @@ const wordSlice = createSlice({
       console.log("setActiveFilter", action);
       localStorage.setItem('activeFilter', state.activeFilter);
       state.activeFilter = action.payload;
+      state.currentPage = 1;
     },
-    setTotalItems: (state, action: PayloadAction<number>) => {
-      state.totalItems = action.payload;
+    setSearchStore: (state, action: PayloadAction<string>) => {
+      state.currentPage = 1;
+      state.searchStore = action.payload;
+    },
+    setHighlightNewWord: (state, action: PayloadAction<string>) => {
+      state.highlightNewWord = action.payload;
     },
   },
 });
 
-export const { setCurrentPage, setActiveFilter } = wordSlice.actions;
+export const { setCurrentPage, setActiveFilter, setSearchStore, setHighlightNewWord } = wordSlice.actions;
 export default wordSlice.reducer;

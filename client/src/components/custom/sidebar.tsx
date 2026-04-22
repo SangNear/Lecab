@@ -6,7 +6,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useState } from 'react'
-
+import { motion } from 'motion/react'
+const MotionLink = motion(Link)
 export const sidebarItems = [
     {
         icon: HomeIcon,
@@ -35,7 +36,7 @@ const Sidebar = () => {
     const user = useAppSelector((state) => state.auth.user)
     const { theme } = useTheme()
     const [openLogoutModal, setOpenLogoutModal] = useState(false)
-    const sidebarTextColor = theme.endsWith('-dark') ? 'text-white' : 'text-black'
+    const sidebarTextColor = theme === 'dark' ? 'text-white' : 'text-black'
 
     return (
         <div className=' hidden lg:flex flex-col max-w-[250px] min-w-[250px] h-screen bg-card sticky top-0 left-0 border-r border-border'>
@@ -45,11 +46,28 @@ const Sidebar = () => {
             </div>
             <nav className='p-4 flex-1'>
                 {sidebarItems.map((item) => (
-                    <Link className={`flex mt-2 gap-2 p-4 items-center rounded-2xl transition-all duration-300 ${pathname === item.href ? 'bg-accent-soft' : 'hover:bg-surface'} ${sidebarTextColor}`} href={item.href} key={item.href}>
-                        <item.icon className={`w-4 h-4 ${sidebarTextColor}`} />
-                        <span className={`font-semibold font-lora text-sm ${sidebarTextColor}`}>{item.label}</span>
-
-                    </Link>
+                    <MotionLink
+                        className={`flex mt-2 relative  gap-2 p-4  items-center rounded-2xl  group transition-all duration-300
+                            `}
+                        href={item.href}
+                        key={item.href}
+                    >
+                        {pathname === item.href && (
+                            <motion.span
+                                layoutId="sidebar-active-bg"
+                                className="absolute inset-0 rounded-2xl bg-accent-soft"
+                                transition={{ type: 'spring', stiffness: 400, damping: 45 }}
+                            />
+                        )}
+                        <item.icon
+                            className={`w-4 h-4 z-10    ${pathname === item.href ? 'text-accent' : 'group-hover:translate-x-2 transition-all duration-300'}`}
+                        />
+                        <span
+                            className={`font-semibold z-10 font-sans text-sm transition-all duration-300
+                         ${pathname === item.href ? 'text-accent' : 'group-hover:translate-x-2 '}`}>
+                            {item.label}
+                        </span>
+                    </MotionLink>
                 ))}
             </nav>
             <div className='flex items-center gap-2  pb-6 px-4 '>
@@ -65,7 +83,7 @@ const Sidebar = () => {
                 </div>
                 <div>
                     <LogOutIcon className={`w-4 h-4 ${sidebarTextColor}`} onClick={() => setOpenLogoutModal(true)} />
-                    
+
                 </div>
             </div>
         </div>
