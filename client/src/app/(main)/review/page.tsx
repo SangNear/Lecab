@@ -2,10 +2,10 @@
 import ButtonCustom from '@/components/custom/buttonCustom'
 import EmptyReview from '@/components/custom/emptyReview'
 import ProgressReview from '@/components/custom/progressReview'
-import SynonymComponent from '@/components/custom/synonym'
+
 import WordToReview from '@/components/custom/wordToReview'
 
-import { useGetSynonymsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, WordType } from '@/store/api/wordApi'
+import { useGetWordsToReviewQuery, useUpdateWordReviewMutation } from '@/store/api/wordApi'
 import { Check, CornerDownLeft } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -14,7 +14,7 @@ import { toast } from 'sonner'
 const ReviewPage = () => {
 
     const [currentIndex, setCurrentIndex] = useState(0)
-    
+
 
     const { data: wordsToReview = [], isLoading: isLoadingWordsToReview } = useGetWordsToReviewQuery(undefined, {
         refetchOnMountOrArgChange: true
@@ -23,23 +23,23 @@ const ReviewPage = () => {
 
 
     const currentWord = wordsToReview?.[currentIndex]
-    const { data: synonymsData = [] } = useGetSynonymsQuery(
-        { wordId: currentWord?.id ?? '' },
-        { skip: !currentWord?.id },
-    )
+    // const { data: synonymsData = [] } = useGetSynonymsQuery(
+    //     { wordId: currentWord?.id ?? '' },
+    //     { skip: !currentWord?.id },
+    // )
 
     const [isRevealed, setIsRevealed] = useState(false)
     const handleRevealed = async () => {
         setIsRevealed(true)
     }
-    const voice = useMemo(() => new SpeechSynthesisUtterance(currentWord?.word), [currentWord?.word])
+
 
     const handleVoice = () => {
-        speechSynthesis.speak(voice)
+        // speechSynthesis.speak(voice)
     }
     const startTimeRef = useRef<number | null>(null);
 
-    
+
 
     useEffect(() => {
         startTimeRef.current = Date.now();
@@ -66,7 +66,7 @@ const ReviewPage = () => {
                     console.log("res", res)
                     toast.success("Sẽ review sau vài ngày nữa")
                     setCurrentIndex(currentIndex + 1)
-                    
+
                     setIsRevealed(false)
                 })
                 .catch((err) => {
@@ -116,7 +116,7 @@ const ReviewPage = () => {
 
                         </div>
                     </div>
-                    
+
                 </>
             ) : (
                 <EmptyReview />

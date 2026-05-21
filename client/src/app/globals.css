@@ -8,16 +8,21 @@
    DESIGN TOKENS (default = violet-light)
 ========================= */
 :root {
-  --background: #faf5ff;
-  --foreground: #1a0a2e;
-  --muted: #7c3aed;
-  --border: #ddd6fe;
-  --accent: #7c3aed;
-
+  --background: #fffaf5;
+  /* Kem ấm, không trắng chói */
+  --foreground: #1c0a00;
+  /* Nâu đen đậm, dễ đọc */
+  --muted: #6b5a50;
+  /* Nâu xám trung tính */
+  --border: #ffe8d0;
+  /* Cam kem rất nhạt */
+  --accent: #ea6c00;
+  /* Cam đậm, rực nhưng không gắt */
   --card: #ffffff;
+
+  --sidebar: #ffffff;
   --danger: #dc2626;
   --success: #15803d;
-
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -73,22 +78,44 @@ html {
 }
 
 [data-theme="light"] {
-  --background: #fffaf5;   /* Kem ấm, không trắng chói */
-  --foreground: #1c0a00;   /* Nâu đen đậm, dễ đọc */
-  --muted:      #6b5a50;   /* Nâu xám trung tính */
-  --border:     #ffe8d0;   /* Cam kem rất nhạt */
-  --accent:     #ea6c00;   /* Cam đậm, rực nhưng không gắt */
-  --card:       #ffffff;
+  --background: #fffaf5;
+  /* Kem ấm, không trắng chói */
+  --foreground: #1c0a00;
+  /* Nâu đen đậm, dễ đọc */
+  --muted: #6b5a50;
+  /* Nâu xám trung tính */
+  --border: #ffe8d0;
+  /* Cam kem rất nhạt */
+  --accent: #ea6c00;
+  /* Cam đậm, rực nhưng không gắt */
+  --card: #ffffff;
+
+  --sidebar: #ffffff;
 }
 
 [data-theme="dark"] {
-  --background: #0f0a06;   /* Nâu đen sâu, ấm hơn thuần đen */
-  --foreground: #fff4ee;   /* Trắng ngà ấm */
-  --muted:      #a89080;   /* Nâu nhạt trung tính */
-  --border:     #2a1800;   /* Cam tối rất sâu */
-  --accent:     #f97316;   /* Cam sáng, nổi bật trên nền tối */
-  --card:       #1c0a00;
+  --background: #0a0a0a;
+  /* Nâu đen sâu, ấm hơn thuần đen */
+  --foreground: #fff4ee;
+  /* Trắng ngà ấm */
+  --muted: #a89080;
+  /* Nâu nhạt trung tính */
+  --border: #2a1800;
+  /* Cam tối rất sâu */
+  --accent: #f97316;
+  /* Cam sáng, nổi bật trên nền tối */
+  --card: #1c0a00;
+
+  --sidebar: #111111;
 }
+
+
+
+
+
+
+
+
 
 /* =========================
    MAP TO TAILWIND THEME

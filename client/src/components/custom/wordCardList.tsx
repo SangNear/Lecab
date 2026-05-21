@@ -2,10 +2,12 @@ import { WordType } from '@/store/api/wordApi';
 import { Loader2 } from 'lucide-react'
 import WordCardItem from './wordCardItem';
 
+
 interface WordCardListProps {
     isLoading: boolean;
     filteredWords: WordType[];
 }
+
 
 const WordCardList = ({ isLoading, filteredWords }: WordCardListProps) => {
     return (

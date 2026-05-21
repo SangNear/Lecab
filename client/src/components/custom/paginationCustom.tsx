@@ -2,7 +2,6 @@ import React from 'react'
 import {
     Pagination,
     PaginationContent,
-    PaginationEllipsis,
     PaginationItem,
     PaginationLink,
     PaginationNext,
@@ -10,7 +9,7 @@ import {
 } from "@/components/ui/pagination"
 import { setCurrentPage } from '@/store/slices/wordSlices';
 import { useAppDispatch } from '@/store/hooks';
-import { useRouter } from 'next/navigation';
+
 
 interface PaginationCustomProps {
     totalPages: number;
@@ -31,16 +30,16 @@ const PaginationCustom = ({ totalPages, currentPage, totalItems, search }: Pagin
             {totalItems > 0 && search === '' && (
                 <PaginationContent>
                     <PaginationItem className={currentPage === 1 ? 'hidden' : ''}>
-                        <PaginationPrevious className='' onClick={() => handleClick(currentPage - 1)} />
+                        <PaginationPrevious className='hover:bg-accent hover:text-card' onClick={() => handleClick(currentPage - 1)} />
                     </PaginationItem>
                     {Array.from({ length: totalPages }).map((_, index) => (
                         <PaginationItem key={index}>
-                            <PaginationLink onClick={() => handleClick(index + 1)} isActive={index + 1 === currentPage}>{index + 1}</PaginationLink>
+                            <PaginationLink className='hover:bg-accent hover:text-card' onClick={() => handleClick(index + 1)} isActive={index + 1 === currentPage}>{index + 1}</PaginationLink>
                         </PaginationItem>
                     ))}
 
-                    <PaginationItem className={currentPage === totalPages ? 'hidden' : ''}>
-                        <PaginationNext onClick={() => handleClick(currentPage + 1)} />
+                    <PaginationItem className={`${currentPage === totalPages ? 'hidden' : ''} `}>
+                        <PaginationNext className='hover:bg-accent hover:text-card' onClick={() => handleClick(currentPage + 1)} />
                     </PaginationItem>
                 </PaginationContent>
             )}

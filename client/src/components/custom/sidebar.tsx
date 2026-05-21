@@ -1,7 +1,7 @@
 "use client"
 import { useAppSelector } from '@/store/hooks'
 import { useTheme } from '@/components/theme-provider'
-import { BookOpen, HomeIcon, LogOutIcon, Plus, RotateCw, Sparkles } from 'lucide-react'
+import { BookHeart, BookOpen, HomeIcon, LogOutIcon, Plus, RotateCw, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -20,6 +20,11 @@ export const sidebarItems = [
         label: "Ôn tập"
     },
     {
+        icon: BookHeart,
+        href: "/words",
+        label: "Từ vựng"
+    },
+    {
         icon: BookOpen,
         href: "/library",
         label: "Thư viện"
@@ -29,6 +34,7 @@ export const sidebarItems = [
         href: "/make-story",
         label: "Tạo câu chuyện"
     },
+    
 ]
 
 const Sidebar = () => {
@@ -39,7 +45,7 @@ const Sidebar = () => {
     const sidebarTextColor = theme === 'dark' ? 'text-white' : 'text-black'
 
     return (
-        <div className=' hidden lg:flex flex-col max-w-[250px] min-w-[250px] h-screen bg-card sticky top-0 left-0 border-r border-border'>
+        <div className=' hidden lg:flex flex-col max-w-[250px] min-w-[250px] h-screen bg-sidebar sticky top-0 left-0 border-r border-border'>
             <div className='p-8 '>
                 <Image src="/logo.svg" alt="logo" width={40} height={40} className='w-full h-auto' />
 

@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import authRoute from "./routes/authRoute/index.js";
 import cors from "cors";
 import wordRoute from "./routes/wordRoute/index.js";
+import categoryRoute from "./routes/categoryRoute/index.js";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -17,6 +18,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoute);
 app.use("/api/word", wordRoute);
+app.use("/api/category", categoryRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

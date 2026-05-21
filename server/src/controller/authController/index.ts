@@ -1,7 +1,4 @@
 import type { Request, Response } from "express";
-import { PrismaClient } from "../../generated/prisma/client.js";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
 import { comparePassword, generateAccessToken, generateRefreshToken, hashPassword, hashToken } from "../../utility/index.js";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../lib/prisma.js";

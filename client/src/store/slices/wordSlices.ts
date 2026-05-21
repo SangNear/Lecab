@@ -6,6 +6,7 @@ interface WordUIState {
   activeFilter: string; // 'all', 'B1', 'B2', 'C1'
   searchStore: string;
   highlightNewWord: string
+  openListWords: boolean
 }
 
 const initialState: WordUIState = {
@@ -14,6 +15,8 @@ const initialState: WordUIState = {
   activeFilter: 'all',
   searchStore: '',
   highlightNewWord: '',
+  openListWords: false,
+  
 };
 
 const wordSlice = createSlice({
@@ -36,8 +39,11 @@ const wordSlice = createSlice({
     setHighlightNewWord: (state, action: PayloadAction<string>) => {
       state.highlightNewWord = action.payload;
     },
+    setOpenListWords: (state, action: PayloadAction<boolean>) => {
+      state.openListWords = action.payload;
+    },
   },
 });
 
-export const { setCurrentPage, setActiveFilter, setSearchStore, setHighlightNewWord } = wordSlice.actions;
+export const { setCurrentPage, setActiveFilter, setSearchStore, setHighlightNewWord, setOpenListWords } = wordSlice.actions;
 export default wordSlice.reducer;

@@ -15,7 +15,7 @@ export async function comparePassword(inputPassword: string, hashedPassword: str
 }
 
 export function generateAccessToken(userId: string) {
-    return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "15m" })
+    return jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET as string, { expiresIn: "1h" })
 }
 
 export function generateRefreshToken(userId: string) {

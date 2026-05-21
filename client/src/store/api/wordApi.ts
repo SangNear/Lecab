@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "./baseQuery";
+import { getWordById } from "../../../../server/src/controller/wordController";
 
 
 interface WordPayload {
@@ -7,16 +8,34 @@ interface WordPayload {
     meaning: string;
     example: string[];
 }
+interface WordUpdatePayload {
+    wordId: string;
+    categoryId: string;
+    word?: string;
+    meaning?: string;
+    example?: string;
+    pronunciation?: string | null;
+    cefrLevel?: string;
+    partOfSpeech?: string;
+    addCollocations?: string[];
+    removeCollocations?: string[];
+    addSynonyms?: string[];
+    removeSynonyms?: string[];
+}
 
 export interface WordType {
     id: string;
     userId: string;
     word: string;
+    categoryId: string;
     meaning: string;
     example: string[];
     pronunciation: string | null;
     cefrLevel: string;
+    collocations: string[];
+    synonyms: string[];
     correctCount: number;
+    partsofSpeech: string;
     wrongCount: number;
     isFavorite: boolean;
     level: number;
@@ -59,34 +78,47 @@ interface GetSynonymsApiResponse {
     success?: boolean;
     data?: SynonymResponse | null;
 }
-interface WordDetail {
-    pronunciation: string;
-    cefrLevel: string;
-    collocations: string[];
-    definitions: AIDefinition[];
-    synonyms: AISynonym[];
-}
-interface AIDefinition {
-    partOfSpeech: string;
-    context: string;
-    exampleEn: string;
-    exampleVi: string;
-}
-interface AISynonym {
-    meaningEn: string;
-    meaningVi: string;
-}
+
+
+
 interface GetWordsParams {
     page?: number;
     limit?: number;
-    cefrLevel?: string;
     search?: string;
+    categoryId?: string;
 }
 export const wordApi = createApi({
     reducerPath: "wordApi",
     baseQuery: baseQueryWithReauth,
     tagTypes: ['words', 'wordsToReview', 'synonyms'],
     endpoints: (builder) => ({
+        getWords: builder.query<GetWordsResponse, GetWordsParams>({
+            query: ({ page = 1, limit = 20, search, categoryId } = {}) => ({
+                url: `word/get-words/${categoryId}`,
+                method: "GET",
+                params: { page, limit, search: search ?? undefined },
+
+            }),
+            providesTags: ['words'],
+        }),
+        getWordById: builder.query<WordType, { wordId: string; categoryId: string }>({
+            query: ({ wordId, categoryId }) => ({
+                url: `word/get-word/${encodeURIComponent(wordId)}`,
+                method: "GET",
+                params: { categoryId }
+            }),
+            providesTags: (result, error, { wordId }) => [{ type: "words", id: wordId }],
+        }),
+        updateWord: builder.mutation<WordType, WordUpdatePayload>({
+            query: (updateData) => ({
+                url: "word/update-word",
+                method: "PUT",
+                body: updateData,
+            }),
+            invalidatesTags: (result, error, arg) => [
+                { type: "words", id: arg.wordId },
+            ],
+        }),
         createWord: builder.mutation<WordType, WordPayload>({
             query: (word) => ({
                 url: "word/add-word",
@@ -95,14 +127,7 @@ export const wordApi = createApi({
             }),
             invalidatesTags: ['words', 'wordsToReview']
         }),
-        getWords: builder.query<GetWordsResponse, GetWordsParams>({
-            query: ({ page = 1, limit = 12, cefrLevel, search } = {}) => ({
-                url: "word/get-words",
-                method: "GET",
-                params: { page, limit, cefrLevel: cefrLevel === 'all' ? undefined : cefrLevel, search: search ?? undefined },
-            }),
-            providesTags: ['words'],
-        }),
+
         getWordsToReview: builder.query<WordType[], void>({
             query: () => ({
                 url: "word/get-words-to-review",
@@ -133,15 +158,7 @@ export const wordApi = createApi({
             }
         }),
 
-        getWordDetail: builder.query<WordDetail, { wordParams: string }>({
-            query: ({ wordParams }) => ({
-                url: `word/generate-word-detail/${encodeURIComponent(wordParams)}`,
-                method: "GET",
-            }),
-            transformResponse: (response: WordDetail) => {
-                return response;
-            }
-        })
+
     })
 })
-export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery, useGetWordDetailQuery } = wordApi;
+export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery, useUpdateWordMutation, useGetWordByIdQuery } = wordApi;

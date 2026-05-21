@@ -1,12 +1,21 @@
-"use client"
+
 import ThemeSwitcher from '@/components/custom/theme-switcher'
 import { Button } from '@/components/ui/button'
 import { useAppSelector } from '@/store/hooks'
 import { ArrowRight, BookOpen, ChartColumn, CircleCheck, Languages, Library, Rocket, Rotate3D, Sparkles } from 'lucide-react'
+import { cookies } from 'next/headers'
+
 import Link from 'next/link'
 
-const Homepage = () => {
-  const { isAuthenticated } = useAppSelector((state) => state.auth)
+async function getAuthStatus() {
+  const cookieStore = await cookies() // 👈 thêm await
+  const token = cookieStore.get("refreshToken")
+  console.log('Token from cookies:', token) // Debug: Kiểm tra giá trị token
+  return !!token
+}
+
+const Homepage = async () => {
+  const isAuthenticated = await getAuthStatus()
   return (
     <div className='pt-6 min-h-screen overflow-hidden relative bg-background'>
       <nav className='w-full fixed top-0 z-50 border-b border-border bg-card'>
@@ -40,7 +49,7 @@ const Homepage = () => {
       </nav>
 
       <section className='pt-40 pb-20  mx-auto flex flex-col items-center justify-center max-w-7xl overflow-hidden'>
-        <div className='bg-accent-soft border border-border py-[6px] px-4 rounded-lg inline-flex items-center mb-8 gap-2'>
+        <div className='bg-accent-soft border border-border py-1.5 px-4 rounded-lg inline-flex items-center mb-8 gap-2'>
           <Sparkles className='w-3 h-3 text-accent' />
           <span className='text-accent font-bold uppercase text-xs  tracking-widest'>Học tập chuyên sâu</span>
         </div>
@@ -62,27 +71,27 @@ const Homepage = () => {
 
       <section className='max-w-7xl mx-auto pt-12 px-6'>
         <div className='grid grid-cols-1 md:grid-cols-12 gap-6'>
-          <div className='p-12 relative  flex flex-col border md:col-span-8 rounded-[2.5rem] border-border bg-card min-h-[380px]'>
+          <div className='p-12 relative  flex flex-col border md:col-span-8 rounded-[2.5rem] border-border bg-card min-h-95'>
             <div className='mb-8 w-12 h-12 flex items-center justify-center bg-accent-soft border border-border rounded-lg'>
               <Library className=' text-accent' />
             </div>
             <h3 className='tracking-tight text-3xl font-bold font-serif mb-4 text-foreground'>Thư viện từ vựng chuẩn hóa</h3>
             <p className='text-subtle text-sm md:text-base  font-sans leading-relaxed max-w-md'>Chúng tôi đang hoàn thiện kho dữ liệu 50,000+ từ vựng, tập trung vào tính chính xác và bối cảnh sử dụng thực tế của người bản xứ.</p>
             <div className='absolute  bottom-0 right-0 p-8 flex gap-3 items-center justify-center'>
-              <div className='py-2 px-4 rounded-xl bg-surface border border-border transition-all duration-100 hover:translate-y-[-10px]'>
+              <div className='py-2 px-4 rounded-xl bg-surface border border-border transition-all duration-100 hover:-translate-y-2.5'>
                 <span className='text-accent uppercase text-xs   tracking-widest font-bold'>business</span>
               </div>
-              <div className='py-2 px-4 rounded-xl bg-accent-soft border border-border transition-all duration-100 hover:translate-y-[-10px]'>
+              <div className='py-2 px-4 rounded-xl bg-accent-soft border border-border transition-all duration-100 hover:-translate-y-2.5'>
                 <span className='text-muted uppercase text-xs   tracking-widest font-bold'>IELTS Core</span>
               </div>
-              <div className='py-2 px-4 rounded-xl bg-success-soft border border-success-border transition-all duration-100 hover:translate-y-[-10px]'>
+              <div className='py-2 px-4 rounded-xl bg-success-soft border border-success-border transition-all duration-100 hover:-translate-y-2.5'>
                 <span className='text-success uppercase text-xs   tracking-widest font-bold'>Daily Mix
                 </span>
               </div>
             </div>
           </div>
 
-          <div className='md:col-span-4 bg-foreground rounded-[2.5rem] p-8 flex flex-col justify-between group overflow-hidden relative min-h-[380px] shadow-2xl text-background'>
+          <div className='md:col-span-4 bg-foreground rounded-[2.5rem] p-8 flex flex-col justify-between group overflow-hidden relative min-h-95 shadow-2xl text-background'>
             <div className='relative z-10'>
               <div className='w-10 h-10 bg-background/10 rounded-xl flex items-center justify-center border border-background/10 mb-8'>
                 <Rotate3D className='w-5 h-5 text-accent' />
@@ -104,7 +113,7 @@ const Homepage = () => {
             </div>
           </div>
 
-          <div className='md:col-span-5 p-10 min-h-[300px] flex flex-col bg-accent-soft border border-border rounded-[2.5rem] group hover:bg-accent-soft/80 justify-between'>
+          <div className='md:col-span-5 p-10 min-h-75 flex flex-col bg-accent-soft border border-border rounded-[2.5rem] group hover:bg-accent-soft/80 justify-between'>
             <div className='mb-8 w-12 h-12 flex items-center justify-center bg-card border border-border rounded-xl'>
               <Rocket className='w-5 h-5 text-accent group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform' />
             </div>
@@ -112,7 +121,7 @@ const Homepage = () => {
             <p className='text-subtle text-sm font-light leading-relaxed'>Chúng tôi đang ở những bước đầu tiên. Hãy trở thành những người dùng sớm nhất để cùng đóng góp ý kiến và định hình VocabMaster.</p>
           </div>
 
-          <div className='md:col-span-7 min-h-[300px] flex flex-col border border-border rounded-[2.5rem] p-10 bg-card'>
+          <div className='md:col-span-7 min-h-75 flex flex-col border border-border rounded-[2.5rem] p-10 bg-card'>
             <div className='mb-8 w-12 h-12 flex items-center justify-center bg-accent-soft border border-border rounded-lg'>
               <Languages className=' text-accent' />
             </div>
@@ -168,8 +177,8 @@ const Homepage = () => {
             <div className='flex flex-col'>
               <h3 className='text-4xl tracking-wider mb-8'>Đồng hành cùng dự án VocabMaster</h3>
               <div className='flex flex-col gap-4'>
-                <Link href="#" className='py-[14px] px-8 bg-accent text-primary-foreground w-fit rounded-2xl font-bold hover:bg-accent-hover transition-colors'>Đăng ký trải nghiệm</Link>
-                <Link href="#" className='py-[14px] px-8 bg-transparent border border-background/20 text-background w-fit rounded-2xl font-bold hover:border-background/40 transition-colors'>Đóng góp ý tưởng</Link>
+                <Link href="#" className='py-3.5 px-8 bg-accent text-primary-foreground w-fit rounded-2xl font-bold hover:bg-accent-hover transition-colors'>Đăng ký trải nghiệm</Link>
+                <Link href="#" className='py-3.5 px-8 bg-transparent border border-background/20 text-background w-fit rounded-2xl font-bold hover:border-background/40 transition-colors'>Đóng góp ý tưởng</Link>
               </div>
             </div>
 

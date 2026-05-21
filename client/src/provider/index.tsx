@@ -36,14 +36,14 @@ const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
                 }))
             } catch (error) {
 
-            }finally {
+            } finally {
                 setIsLoading(false)
             }
         }
         restoreAuth()
     }, [])
 
-    if (isLoading) return <div>Loading dasdas...</div>
+
     return (
         <>{children}</>
     )
