@@ -14,6 +14,7 @@ import StatItem from '@/components/custom/statItem'
 import { getColumns } from './columns'
 import { Button } from '@/components/ui/button'
 import DrawerAddWord from '@/components/custom/drawerAddWord'
+import { generateQuiz } from '@/lib/generateQuiz'
 
 
 
@@ -69,6 +70,9 @@ const Words = () => {
     () => getColumns(selectedIds, handleToggle),
     [selectedIds]
   )
+
+
+
 
   const selectedCategoryName =
     categoryIdCurrent === "all"

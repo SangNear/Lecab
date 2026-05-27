@@ -1,7 +1,7 @@
 "use client"
 import { useAppSelector } from '@/store/hooks'
 import { useTheme } from '@/components/theme-provider'
-import { BookHeart, BookOpen, HomeIcon, LogOutIcon, Plus, RotateCw, Sparkles } from 'lucide-react'
+import { BookHeart, BookOpen, HomeIcon, LogOutIcon, Plus, RotateCw, Sparkles, Zap } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -20,6 +20,11 @@ export const sidebarItems = [
         label: "Ôn tập"
     },
     {
+        icon: Zap,
+        href: "/practice",
+        label: "Luyện tập"
+    },
+    {
         icon: BookHeart,
         href: "/words",
         label: "Từ vựng"
@@ -34,7 +39,8 @@ export const sidebarItems = [
         href: "/make-story",
         label: "Tạo câu chuyện"
     },
-    
+
+
 ]
 
 const Sidebar = () => {
@@ -45,7 +51,7 @@ const Sidebar = () => {
     const sidebarTextColor = theme === 'dark' ? 'text-white' : 'text-black'
 
     return (
-        <div className=' hidden lg:flex flex-col max-w-[250px] min-w-[250px] h-screen bg-sidebar sticky top-0 left-0 border-r border-border'>
+        <div className=' hidden lg:flex flex-col max-w-62.5 min-w-62.5 h-screen bg-sidebar sticky top-0 left-0 border-r border-border'>
             <div className='p-8 '>
                 <Image src="/logo.svg" alt="logo" width={40} height={40} className='w-full h-auto' />
 
@@ -62,7 +68,7 @@ const Sidebar = () => {
                             <motion.span
                                 layoutId="sidebar-active-bg"
                                 className="absolute inset-0 rounded-2xl bg-accent-soft"
-                                transition={{ type: 'spring', stiffness: 400, damping: 45 }}
+                                transition={{ type: 'spring', stiffness: 900, damping: 45 }}
                             />
                         )}
                         <item.icon

@@ -10,7 +10,6 @@ import {
 import { DynamicIcon } from "lucide-react/dynamic"
 import { EllipsisVertical, Pencil, Trash } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
-import ProgressBar from "./progressBar"
 
 import {
     AlertDialog,
@@ -39,6 +38,7 @@ import { toast } from "sonner"
 
 
 import { ListWord } from "./listWord"
+import { Progress } from "../ui/progress"
 
 interface CategoryProps {
     item: CategoryType
@@ -179,7 +179,7 @@ const CategoryCardItem = ({ item }: CategoryProps) => {
                     {item.wordCount} từ
                 </span>
 
-                <ProgressBar completed={1} total={item.wordCount} />
+                <Progress value={10} className="h-2" />
 
 
                 {/* ===== LIST WORD DIALOG ===== */}

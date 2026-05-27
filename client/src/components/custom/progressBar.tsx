@@ -32,7 +32,7 @@ const ProgressBar = ({ completed, total }: Props) => {
             {/* progress */}
             <Progress
                 value={percent}
-                indicatorClassName={`${color}  rounded-full`}
+                className={`${color}  rounded-full`}
             />
         </div>
     )

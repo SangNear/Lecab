@@ -35,7 +35,7 @@ const CustomSelect = ({ value, onChange, options, placeholder = 'Chọn...', err
     return (
         <div className={cn('flex flex-col gap-2', className)} ref={ref}>
             {label && (
-                <label className='text-sm uppercase font-semibold tracking-widest text-muted'>
+                <label className='text-sm  font-semibold tracking-wide text-muted'>
                     {label}
                 </label>
             )}

@@ -1,7 +1,7 @@
 "use client"
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
-import { generateQuiz } from "@/lib/generateQuiz"
+
 import { useGetWordsQuery } from "@/store/api/wordApi"
 import { Loader2 } from "lucide-react"
 
@@ -15,10 +15,7 @@ export function ListWord({ categoryId }: ListWordProps) {
 
     const listWordsData = listWords?.data
 
-    const quiz = listWordsData && listWordsData.length >= 4
-        ? generateQuiz(listWordsData, 10)
-        : [];
-    console.log("quiz", quiz);
+
     if (isLoading) return (
         <div className="flex justify-center py-8">
             <Loader2 className="animate-spin" />

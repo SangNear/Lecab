@@ -85,7 +85,7 @@ interface GetWordsParams {
     page?: number;
     limit?: number;
     search?: string;
-    categoryId?: string;
+    categoryId?: string | null;
 }
 export const wordApi = createApi({
     reducerPath: "wordApi",

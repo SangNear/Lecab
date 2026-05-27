@@ -31,7 +31,7 @@ const CategoryCardList = ({ isLoading, filteredCategories }: CategoryListProps) 
                 ) : null}
             <button
                 onClick={() => setOpenCreateCategoryDialog(true)}
-                className="group cursor-pointer relative flex flex-col items-center justify-center p-6  border-2 border-dashed border-gray-200 rounded-2xl hover:border-orange-400 hover:bg-orange-50/30 transition-all duration-300 min-h-[320px]"
+                className="group cursor-pointer relative flex flex-col items-center justify-center p-6  border-2 border-dashed border-gray-200 rounded-2xl hover:border-orange-400 hover:bg-orange-50/30 transition-all duration-300 min-h-80"
             >
                 <div className="p-4 bg-orange-100 rounded-full group-hover:scale-110 transition-transform duration-300">
                     <Plus size={32} className="text-orange-600" />

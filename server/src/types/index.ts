@@ -17,3 +17,7 @@ export interface Synonym {
     word: string;
     meaningVi: string;
 }
+
+
+
+
