@@ -29,9 +29,9 @@ export function DataTable<TValue>({
     return (
         <div className="overflow-x-auto rounded-md border">
             <Table className="min-w-full p-4">
-                <TableHeader className=" border-b hover:none">
+                <TableHeader className=" border-b ">
                     {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow className="cursor-default hover:transform-none hover:translate-y-0 hover:bg-none" key={headerGroup.id}>
+                        <TableRow className="cursor-default" key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (
                                 <TableHead key={header.id} className={` ${getStickyClass(header.column.id)} p-0 `}>
                                     {header.isPlaceholder
@@ -48,7 +48,7 @@ export function DataTable<TValue>({
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
-                                className="cursor-pointer hover:bg-accent/30"
+                                className="cursor-pointer "
                                 onClick={() => {
                                     console.log("row id:", row.original.word)
                                     onRowClick?.(row.original)

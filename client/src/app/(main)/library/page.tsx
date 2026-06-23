@@ -4,7 +4,9 @@ import { useGetAllCategoriesQuery } from '@/store/api/categoryApi'
 import CategoryCardList from '@/components/custom/categoryCardList'
 
 const LibraryPage = () => {
-    const { data: categories, isLoading: isLoadingCategories } = useGetAllCategoriesQuery();
+    const { data: categories, isLoading: isLoadingCategories } = useGetAllCategoriesQuery(undefined, {
+        refetchOnMountOrArgChange: true
+    });
 
     return (
         <div className='flex flex-col'>
@@ -15,19 +17,19 @@ const LibraryPage = () => {
                 </div>
 
                 <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-10'>
-                    <div className='bg-card  border border-orange-900/10 p-4 rounded-2xl '>
+                    <div className='bg-sidebar  border border-orange-900/10 p-4 rounded-2xl '>
                         <p className='text-xs text-foreground uppercase font-bold tracking-wider mb-1'>Tổng bộ từ</p>
                         <p className='text-2xl font-bold text-accent'>{categories?.length}</p>
                     </div>
-                    <div className='bg-card  border border-orange-900/10 p-4 rounded-2xl'>
+                    <div className='bg-sidebar  border border-orange-900/10 p-4 rounded-2xl'>
                         <p className='text-xs text-foreground uppercase font-bold tracking-wider mb-1'>Đã thuộc</p>
                         <p className='text-2xl font-bold text-green-500'>954</p>
                     </div>
-                    <div className='bg-card  border border-orange-900/10 p-4 rounded-2xl'>
+                    <div className='bg-sidebar  border border-orange-900/10 p-4 rounded-2xl'>
                         <p className='text-xs text-foreground uppercase font-bold tracking-wider mb-1'>Cần ôn tập</p>
                         <p className='text-2xl font-bold text-red-500'>12</p>
                     </div>
-                    <div className='bg-card  border border-orange-900/10 p-4 rounded-2xl'>
+                    <div className='bg-sidebar  border border-orange-900/10 p-4 rounded-2xl'>
                         <p className='text-xs text-foreground uppercase font-bold tracking-wider mb-1'>Tổng số từ</p>
                         <p className='text-2xl font-bold text-muted'>1223</p>
                     </div>

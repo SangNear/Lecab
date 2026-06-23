@@ -3,10 +3,18 @@ import { baseQueryWithReauth } from "./baseQuery";
 import { getWordById } from "../../../../server/src/controller/wordController";
 
 
-interface WordPayload {
+interface WordPayloadItem {
     word: string;
     meaning: string;
+    pronunciation?: string;
+    partsofSpeech?: string;
     example: string[];
+    collocations?: string[];
+    synonyms?: string[];
+}
+export interface WordPayload {
+    words: WordPayloadItem[];
+    categoryId: string;
 }
 interface WordUpdatePayload {
     wordId: string;
@@ -28,6 +36,7 @@ export interface WordType {
     userId: string;
     word: string;
     categoryId: string;
+    status: "UNREVIEWED" | "REMEMBERED" | "FORGOTTEN";
     meaning: string;
     example: string[];
     pronunciation: string | null;
@@ -41,6 +50,7 @@ export interface WordType {
     level: number;
     lastReviewedAt: string | null;
     nextReviewDate: string;
+    nextInterval: number;
 
 }
 
@@ -87,6 +97,18 @@ interface GetWordsParams {
     search?: string;
     categoryId?: string | null;
 }
+interface ReviewStats {
+    needReview: number;
+    unreviewed: number;
+    remembered: number;
+}
+interface GetWordsToReviewResponse {
+    success: boolean;
+    data: {
+        wordsToReview: WordType[];
+        stats: ReviewStats;
+    };
+}
 export const wordApi = createApi({
     reducerPath: "wordApi",
     baseQuery: baseQueryWithReauth,
@@ -119,7 +141,7 @@ export const wordApi = createApi({
                 { type: "words", id: arg.wordId },
             ],
         }),
-        createWord: builder.mutation<WordType, WordPayload>({
+        createWords: builder.mutation<WordType, WordPayload>({
             query: (word) => ({
                 url: "word/add-word",
                 method: "POST",
@@ -128,18 +150,20 @@ export const wordApi = createApi({
             invalidatesTags: ['words', 'wordsToReview']
         }),
 
-        getWordsToReview: builder.query<WordType[], void>({
+        getWordsToReview: builder.query<{ words: WordType[]; stats: ReviewStats }, void>({
             query: () => ({
                 url: "word/get-words-to-review",
                 method: "GET",
             }),
             providesTags: ['wordsToReview'],
-            transformResponse: (response: GetWordsResponse | WordType[]) => {
-                if (Array.isArray(response)) return response;
-                return response?.data ?? [];
-            }
+            transformResponse: (response: GetWordsToReviewResponse) => {
+                return {
+                    words: response?.data?.wordsToReview ?? [],
+                    stats: response?.data?.stats ?? { needReview: 0, unreviewed: 0, remembered: 0 },
+                };
+            },
         }),
-        updateWordReview: builder.mutation<WordType, { wordId: string, performance: "again" | "easy", duration: number }>({
+        updateWordReview: builder.mutation<WordType, { wordId: string, performance: "again" | "easy" | "vague", duration: number }>({
             query: ({ wordId, performance, duration }) => ({
                 url: "word/update-word-review",
                 method: "POST",
@@ -161,4 +185,4 @@ export const wordApi = createApi({
 
     })
 })
-export const { useCreateWordMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery, useUpdateWordMutation, useGetWordByIdQuery } = wordApi;
+export const { useCreateWordsMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery, useUpdateWordMutation, useGetWordByIdQuery } = wordApi;

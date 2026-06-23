@@ -14,11 +14,11 @@ export const sidebarItems = [
         href: "/dashboard",
         label: "Trang chủ"
     },
-    {
-        icon: RotateCw,
-        href: "/review",
-        label: "Ôn tập"
-    },
+    // {
+    //     icon: RotateCw,
+    //     href: "/review",
+    //     label: "Ôn tập"
+    // },
     {
         icon: Zap,
         href: "/practice",
@@ -51,7 +51,7 @@ const Sidebar = () => {
     const sidebarTextColor = theme === 'dark' ? 'text-white' : 'text-black'
 
     return (
-        <div className=' hidden lg:flex flex-col max-w-62.5 min-w-62.5 h-screen bg-sidebar sticky top-0 left-0 border-r border-border'>
+        <div className=' hidden lg:flex flex-col max-w-62.5 min-w-62.5 h-screen  sticky top-0 left-0 '>
             <div className='p-8 '>
                 <Image src="/logo.svg" alt="logo" width={40} height={40} className='w-full h-auto' />
 

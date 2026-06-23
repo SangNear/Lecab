@@ -9,12 +9,15 @@ import { useGetAllCategoriesQuery } from '@/store/api/categoryApi'
 import { useGetWordsQuery, WordType } from '@/store/api/wordApi'
 import PaginationCustom from '@/components/custom/paginationCustom'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { setSearchStore } from '@/store/slices/wordSlices'
+import { setCurrentPage, setSearchStore } from '@/store/slices/wordSlices'
 import StatItem from '@/components/custom/statItem'
 import { getColumns } from './columns'
 import { Button } from '@/components/ui/button'
 import DrawerAddWord from '@/components/custom/drawerAddWord'
-import { generateQuiz } from '@/lib/generateQuiz'
+import { generateQuiz } from '@/lib/generatePractice'
+
+import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '@/components/ui/dialog'
+import FormAddWords from './_components/FormAddWords'
 
 
 
@@ -86,14 +89,18 @@ const Words = () => {
     <div className='flex flex-col gap-6'>
       <div className='flex items-center justify-between'>
         <h1 className='font-serif text-4xl md:text-5xl italic font-extralight mb-3 -space-x-0.5 tracking-tighter'>Kho từ vựng</h1>
-        <Button className="hover:scale-110 cursor-pointer" variant="outline" onClick={() => setOpenAddWord(true)}>
-          <Plus className="h-4 w-4 text-accent" />
-          <span className="hidden md:block text-accent">Thêm từ</span>
-        </Button>
-        <DrawerAddWord
-          categories={categories ?? []}
-          open={openAddWord}
-          onClose={() => setOpenAddWord(false)} />
+        <Dialog open={openAddWord} onOpenChange={setOpenAddWord}>
+          <DialogTrigger className=" flex items-center gap-2 hover:scale-110 cursor-pointer transition-transform duration-300 ">
+            <Plus className="h-4 w-4 text-accent" />
+            <span className="hidden md:block text-accent">Thêm Từ</span>
+          </DialogTrigger>
+          <DialogContent className=" md:min-w-2xl bg-sidebar">
+            <DialogHeader className='text-xl font-bold'>Thêm từ vựng mới</DialogHeader>
+            <div className=" max-h-96 overflow-y-auto overflow-x-hidden">
+              <FormAddWords setOpenAddWord={setOpenAddWord} categories={categories ?? []} />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-10'>
@@ -103,7 +110,7 @@ const Words = () => {
         <StatItem iconName='flame' iconColor='yellow' title='Streak' value="20" />
       </div>
 
-      <div className='bg-card flex  flex-col md:flex-row md:items-center px-4 py-6 shadow rounded-xl gap-4 md:gap-10 overflow-hidden'>
+      <div className='bg-sidebar flex  flex-col md:flex-row md:items-center px-4 py-6 shadow rounded-xl gap-4 md:gap-10 overflow-hidden'>
         <div className='relative bg-red'>
           <Input
             placeholder='Tìm kiếm từ'
@@ -121,7 +128,8 @@ const Words = () => {
             value={categoryIdCurrent ?? "all"}  // controlled
             onValueChange={(value) => {
               if (value == null) return
-              setCategoryIdCurrent(value === "all" ? "Tất cả" : value)
+              dispatch(setCurrentPage(1))
+              setCategoryIdCurrent(value === "all" ? "all" : value)
             }}
           >
             <SelectTrigger className="w-40">

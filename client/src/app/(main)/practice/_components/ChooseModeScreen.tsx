@@ -1,11 +1,11 @@
-import { Keyboard, Layers, Zap } from 'lucide-react'
+import { Keyboard, Layers, PenIcon, Zap } from 'lucide-react'
 import React from 'react'
 
 interface CardPractice {
     handleChooseMode: (mode: string) => void
 }
 
-const Screen1 = ({ handleChooseMode }: CardPractice) => {
+const ChooseModeScreen = ({ handleChooseMode }: CardPractice) => {
     const cardPractice = [
         {
             title: "Trắc nghiệm",
@@ -14,10 +14,16 @@ const Screen1 = ({ handleChooseMode }: CardPractice) => {
             mode: "quiz"
         },
         {
+            title: "Nghe viết",
+            description: "Nghe phát âm và gõ chính tả từ vựng. Phù hợp để luyện phát âm và ghi nhớ chính tả.",
+            icon: PenIcon,
+            mode: "listen"
+        },
+        {
             title: "Nhập từ vựng",
             description: "Gõ trực tiếp chính tả của từ vựng theo nghĩa gợi ý. Phù hợp nhất để học viết, ghi nhớ chiều sâu cấu trúc.",
             icon: Keyboard,
-            mode: "input"
+            mode: "write"
         },
         {
             title: "Thẻ ghi nhớ",
@@ -51,4 +57,4 @@ const Screen1 = ({ handleChooseMode }: CardPractice) => {
     )
 }
 
-export default Screen1
+export default ChooseModeScreen

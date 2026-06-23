@@ -26,6 +26,12 @@ enum CefrLevel {
   C2
 }
 
+enum WordStatus {
+  UNREVIEWED
+  REMEMBERED
+  FORGOTTEN
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String?
@@ -78,8 +84,8 @@ model Word {
 
   // 🎨 UI / trạng thái
 
-  isFavorite   Boolean @default(false)
-  isRemembered Boolean @default(false)
+  isFavorite Boolean    @default(false)
+  status     WordStatus @default(UNREVIEWED)
 
   level          Int       @default(0) // mức độ nhớ
   lastReviewedAt DateTime?

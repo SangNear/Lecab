@@ -1,7 +1,6 @@
 
 import ThemeSwitcher from '@/components/custom/theme-switcher'
 import { Button } from '@/components/ui/button'
-import { useAppSelector } from '@/store/hooks'
 import { ArrowRight, BookOpen, ChartColumn, CircleCheck, Languages, Library, Rocket, Rotate3D, Sparkles } from 'lucide-react'
 import { cookies } from 'next/headers'
 

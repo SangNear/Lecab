@@ -4,11 +4,12 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowRight, LogOut, Volume2 } from "lucide-react";
 import { useState } from "react";
 import { PracticeResult } from "../page";
-import { QuizItem } from "@/lib/generateQuiz";
+import { QuizItem } from "@/lib/generatePractice";
+import { playFeedbackSound } from "@/lib/audio";
 
 interface QuizModeProps {
     listQuiz: QuizItem[]
-    onFinish: (result: PracticeResult<QuizItem[]>) => void
+    onFinish: (result: PracticeResult<"quiz", QuizItem[]>) => void
 }
 
 const QuizMode = ({ listQuiz, onFinish }: QuizModeProps) => {
@@ -16,65 +17,28 @@ const QuizMode = ({ listQuiz, onFinish }: QuizModeProps) => {
     const [isChoose, setIsChoose] = useState(false);
     const [choose, setChoose] = useState<string | null>(null);
     const [currentQuiz, setCurrentQuiz] = useState(0);
-    const playSound = (isCorrect: boolean) => {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-        if (isCorrect) {
-            // Âm thanh đúng: 2 nốt lên (ding-ding!)
-            [523.25, 783.99].forEach((freq, i) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = "sine";
-                osc.frequency.value = freq;
-                const start = ctx.currentTime + i * 0.15;
-                gain.gain.setValueAtTime(0.3, start);
-                gain.gain.exponentialRampToValueAtTime(0.001, start + 0.3);
-                osc.start(start);
-                osc.stop(start + 0.3);
-            });
-        } else {
-            // Âm thanh sai: 1 nốt thấp, rung xuống (buzz!)
-            [392, 300].forEach((freq, i) => {
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                osc.type = "sine";
-                osc.frequency.value = freq;
-                const start = ctx.currentTime + i * 0.18;
-                gain.gain.setValueAtTime(0.25, start);
-                gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
-                osc.start(start);
-                osc.stop(start + 0.35);
-            });
-        }
-    };
-
-
-
 
     const handleNextQuestion = () => {
         if (currentQuiz >= quizState.length - 1) {
             const totalQuestions = quizState.length;
             const correctCount = quizState.filter(item => item.status === "correct").length;
             const wrongCount = quizState.filter(item => item.status === "incorrect").length;
-            const wrongItems = quizState.filter(item => item.status === "incorrect").map((q) => ({
+            const wrongItems = quizState.map((q) => ({
                 wordId: q.wordId,
-                word: q.answerText,
-                meaning: q.questionText
+                word: q.direction === "word-to-meaning" ? q.questionText : q.correctAnswer,
+                meaning: q.direction === "word-to-meaning" ? q.correctAnswer : q.questionText,
+                userChoice: q.userChoice,
+                status: q.status
             }))
-
             onFinish({
                 totalQuestions,
                 correctCount,
                 wrongCount,
-                wrongItems,
+                wrongItems: wrongItems as { wordId: string; word: string; meaning: string, userChoice: string | null, status: "correct" | "incorrect" }[],
                 practiceItemsRetry: quizState.filter(item => item.status === "incorrect"),
                 practiceType: "quiz",
                 completedAt: new Date(),
-                score: correctCount / totalQuestions * 100
+                score: Math.round(correctCount / totalQuestions * 100 * 100) / 100
             });
 
             return;
@@ -87,12 +51,6 @@ const QuizMode = ({ listQuiz, onFinish }: QuizModeProps) => {
 
     }
 
-    const checkAnswer = () => {
-        const correctAnswer = quizState[currentQuiz]?.answerText;
-        if (choose !== correctAnswer)
-            return false;
-        return true;
-    }
 
     const handleChooseAnswer = (option: string) => {
         if (isChoose) return; // chặn chọn lại sau khi đã chọn
@@ -100,13 +58,13 @@ const QuizMode = ({ listQuiz, onFinish }: QuizModeProps) => {
         setIsChoose(true);
         setChoose(option);
 
-        const isCorrect = option === quizState[currentQuiz]?.answerText;
-        playSound(isCorrect)
+        const isCorrect = option === quizState[currentQuiz]?.correctAnswer;
+        playFeedbackSound(isCorrect);
 
         setQuizState((prev) => {
             return prev.map((quiz, i) => {
                 if (i === currentQuiz) {
-                    return { ...quiz, status: isCorrect ? "correct" : "incorrect" }
+                    return { ...quiz, status: isCorrect ? "correct" : "incorrect", userChoice: option }
                 }
                 return quiz
             })
@@ -114,14 +72,14 @@ const QuizMode = ({ listQuiz, onFinish }: QuizModeProps) => {
     }
 
     const getOptionClass = (option: string) => {
-        const base = "col-span-6 p-4 rounded-lg border-2 transition-all duration-300 font-semibold";
+        const base = "col-span-12 md:col-span-6 p-4 rounded-lg border-2 transition-all duration-300 font-semibold";
 
         if (!isChoose) {
             // chưa chọn: hover bình thường
             return `${base} border-border hover:-translate-y-2 hover:bg-accent/20 hover:border-accent cursor-pointer`;
         }
 
-        const correctAnswer = quizState[currentQuiz]?.answerText;
+        const correctAnswer = quizState[currentQuiz]?.correctAnswer;
 
         if (option === correctAnswer) {
             // luôn highlight đáp án đúng
@@ -139,7 +97,7 @@ const QuizMode = ({ listQuiz, onFinish }: QuizModeProps) => {
 
     return (
         <div className="max-w-5xl mx-auto">
-            <div className="w-full rounded-lg shadow-xl/10 p-4">
+            <div className="w-full rounded-lg shadow-xl/10 p-4 bg-sidebar">
                 <div className="flex items-center justify-between">
                     <p className="font-bold text-lg">
                         Câu hỏi {currentQuiz + 1}/{quizState.length}
@@ -155,7 +113,7 @@ const QuizMode = ({ listQuiz, onFinish }: QuizModeProps) => {
                 <Progress value={((currentQuiz + 1) / quizState.length) * 100} className="w-full py-4" />
             </div>
 
-            <div className="w-full shadow-xl/10 rounded-lg mt-4 p-6">
+            <div className="w-full shadow-xl/10 rounded-lg mt-4 p-6 bg-sidebar">
                 <div className="flex flex-col gap-2 items-center mt-10">
                     <div className="p-2 rounded-full bg-accent/50 hover:bg-accent/70 cursor-pointer">
                         <Volume2 size={16} className="text-white" />

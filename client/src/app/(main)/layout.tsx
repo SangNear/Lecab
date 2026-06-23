@@ -9,7 +9,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     return (
         <div className="flex w-full relative">
             <Sidebar />
-            <main className="flex flex-col w-full mx-auto bg-background">
+            <main className=" flex flex-col w-full mx-auto bg-background overflow-hidden ">
                 <HeaderComponent />
                 <Container>
                     {children}

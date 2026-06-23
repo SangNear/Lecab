@@ -39,11 +39,11 @@ const CustomSelect = ({ value, onChange, options, placeholder = 'Chọn...', err
                     {label}
                 </label>
             )}
-            <div className='relative'>
+            <div className='w-full'>
                 <button
                     type="button"
                     onClick={() => setOpen(prev => !prev)}
-                    className='flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm cursor-pointer  transition-colors'
+                    className='flex h-8 min-w-40 border-gray-300 items-center justify-between rounded-md border bg-transparent px-3 py-1 text-sm shadow-sm cursor-pointer  transition-colors'
                 >
                     <span className={cn(!selected && 'text-muted-foreground')}>
                         {selected ? selected.label : placeholder}
@@ -52,7 +52,7 @@ const CustomSelect = ({ value, onChange, options, placeholder = 'Chọn...', err
                 </button>
 
                 {open && (
-                    <div className='absolute z-9999 mt-1 w-full rounded-md border border-input bg-popover shadow-md overflow-hidden
+                    <div className='absolute z-10 max-h-28 overflow-auto  mt-1 w-fit rounded-md border border-input bg-popover shadow-md 
                         animate-in fade-in-0 zoom-in-95 slide-in-from-top-2 duration-100'>
                         {options.map((opt) => (
                             <button
@@ -62,7 +62,7 @@ const CustomSelect = ({ value, onChange, options, placeholder = 'Chọn...', err
                                     onChange(opt.value)
                                     setOpen(false)
                                 }}
-                                className='flex w-full items-center px-3 py-2 text-sm hover:bg-accent/10 cursor-pointer transition-colors'
+                                className='flex w-full z-100 items-center px-3 py-2 text-sm hover:bg-accent/10 cursor-pointer transition-colors'
                             >
                                 <Check className={cn(
                                     'mr-2 h-4 w-4',

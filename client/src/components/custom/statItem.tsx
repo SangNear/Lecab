@@ -19,7 +19,7 @@ const StatItem = ({ iconName, iconColor, title, value }: StatItemProps) => {
 
     const colors = colorMap[iconColor || 'orange'] ?? colorMap['orange']
     return (
-        <div className='bg-card  border border-orange-900/10 p-4 rounded-2xl '>
+        <div className='bg-sidebar  border border-orange-900/10 p-4 rounded-2xl '>
             <div className={`mb-4  ${colors.bg} w-fit rounded-xl`}>
                 <DynamicIcon name={iconName} className={`${colors.icon} size-10 p-2 rounded-xl`} />
             </div>

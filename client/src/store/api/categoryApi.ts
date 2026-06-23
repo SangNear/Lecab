@@ -1,5 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "./baseQuery";
+import { wordApi } from "./wordApi";
 
 
 interface CategoryResponse {
@@ -30,7 +31,6 @@ export const categoryApi = createApi({
         getAllCategories: builder.query<CategoryType[], void>({
             query: () => ({
                 url: "category/get"
-
             }),
             keepUnusedDataFor: 60,
             transformResponse: (response: CategoryResponse) => {
@@ -52,7 +52,15 @@ export const categoryApi = createApi({
                 method: "POST",
                 body: { categoryId },
             }),
-            invalidatesTags: ["categories"]
+            invalidatesTags: ["categories"],
+            onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+                try {
+                    await queryFulfilled;
+                    dispatch(wordApi.util.invalidateTags(["words", "wordsToReview"]));
+                } catch (error) {
+                    console.error('Error deleting category:', error);
+                }
+            }
         }),
         updateCategory: builder.mutation<CategoryType, { categoryId: string, name: string, description: string }>({
             query: ({ categoryId, name, description }) => ({

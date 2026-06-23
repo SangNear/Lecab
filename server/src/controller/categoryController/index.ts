@@ -3,10 +3,12 @@ import { prisma } from "../../lib/prisma.js";
 export async function addCategory(req: Request, res: Response) {
     try {
         const userId = req.user?.userId;
+        const iconSlugDefault = "library"
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
         const { name, description, iconSlug } = req.body
         if (!name) return res.status(400).json({ message: "Missing required fields" });
+
 
         const isCategoryExist = await prisma.category.findFirst({
             where: {
@@ -19,7 +21,7 @@ export async function addCategory(req: Request, res: Response) {
             data: {
                 name,
                 description,
-                iconSlug,
+                iconSlug: iconSlug || iconSlugDefault,
             }
         });
         return res.status(201).json({ message: "Category added successfully", data: newCategory });

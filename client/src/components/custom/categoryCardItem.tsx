@@ -125,7 +125,7 @@ const CategoryCardItem = ({ item }: CategoryProps) => {
                 transition={{ duration: 0.1 }}
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
-                className="p-8 relative flex flex-col gap-3 rounded-2xl overflow-hidden bg-card shadow-sm hover:-translate-y-2.5 hover:shadow-2xl transition-all duration-300"
+                className="p-8 relative flex flex-col gap-3 rounded-2xl overflow-hidden bg-sidebar shadow-sm hover:-translate-y-2.5 hover:shadow-2xl transition-all duration-300"
             >
                 <div className="flex items-center gap-4 mb-3">
                     <DynamicIcon
@@ -179,7 +179,7 @@ const CategoryCardItem = ({ item }: CategoryProps) => {
                     {item.wordCount} từ
                 </span>
 
-                <Progress value={10} className="h-2" />
+                <Progress value={item.wordCount} className="h-2" />
 
 
                 {/* ===== LIST WORD DIALOG ===== */}

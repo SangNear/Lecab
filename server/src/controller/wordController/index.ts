@@ -2,60 +2,98 @@
 import { GoogleGenAI } from "@google/genai";
 import type { Request, Response } from "express";
 import { prisma } from "../../lib/prisma.js";
-import { CefrLevel, Prisma } from "../../generated/prisma/client.js";
-import { LEXIS_PROMPT_DICTIONARY, LEXIS_PROMPT_STORY, LEXIS_PROMPT_SYNONYMS } from "../../prompts/index.js";
-import type { Definition, LexisDictionaryResponse, Synonym } from "../../types/index.js";
+import { Prisma } from "../../generated/prisma/client.js";
+import { LEXIS_PROMPT_STORY } from "../../prompts/index.js";
+
 
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY as string,
 })
 
-
-
 export async function addWord(req: Request, res: Response) {
     try {
         const userId = req.user?.userId;
+
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
-        const { word, meaning, example, pronunciation, partsofSpeech, categoryId } = req.body;
-        if (word === "" || meaning === "" || !categoryId) {
-            return res.status(400).json({ message: "Missing required fields" });
+
+        const { categoryId, words } = req.body;
+
+        if (!categoryId || !Array.isArray(words) || words.length === 0) {
+            return res.status(400).json({
+                message: "CategoryId and words array are required",
+            });
         }
-        const isWordExist = await prisma.word.findFirst({
+
+
+        const invalidWord = words.find(
+            (item) => !item.word?.trim() || !item.meaning?.trim()
+        );
+
+        if (invalidWord) {
+            return res.status(400).json({
+                message: "Word and meaning are required for every item",
+            });
+        }
+
+
+        const existedWords = await prisma.word.findMany({
             where: {
-                word,
                 userId,
-                categoryId
-            }
-        });
-        if (isWordExist) return res.status(400).json({ message: "Word already exists in this category" });
-        const newWord = await prisma.word.create({
-            data: {
-                userId,
-                word,
-                meaning,
-                partsofSpeech,
-                example,
-                pronunciation,
                 categoryId,
+                word: {
+                    in: words.map((item) => item.word),
+                },
+            },
+            select: {
+                word: true,
+            },
+        });
+
+        const existedSet = new Set(existedWords.map((item) => item.word));
+
+
+        const newWords = words.filter(
+            (item) => !existedSet.has(item.word)
+        );
+
+        if (newWords.length === 0) {
+            return res.status(400).json({
+                message: "Tất cả từ này đã tồn tại trong bộ từ này rồi! Vui lòng chọn bộ khác hoặc thêm từ khác",
+            });
+        }
+
+        await prisma.word.createMany({
+            data: newWords.map((item) => ({
+                userId,
+                categoryId,
+                word: item.word,
+                meaning: item.meaning,
+                example: item.example,
+                pronunciation: item.pronunciation,
+                partsofSpeech: item.partsofSpeech,
                 correctCount: 0,
                 wrongCount: 0,
                 level: 0,
                 isFavorite: false,
                 lastReviewedAt: null,
                 nextReviewDate: new Date(),
+            })),
+        });
 
+        return res.status(201).json({
+            message: "Thêm từ thành công",
+            data: {
+                inserted: newWords.length,
+                skipped: existedWords.map((item) => item.word),
             },
-
-        })
-
-        return res.status(201).json({ message: "Word added successfully", data: newWord });
+        });
     } catch (error: any) {
         return res.status(500).json({
-            message: "Failed to add word",
-            error: error.message
+            message: "Thêm từ thất bại",
+            error: error.message,
         });
     }
 }
@@ -233,14 +271,33 @@ export async function getWordsToReview(req: Request, res: Response) {
     try {
         const userId = req.user?.userId;
         if (!userId) return res.status(401).json({ message: "Unauthorized" });
-        const wordsToReview = await prisma.$queryRaw`
-            SELECT * FROM "words" 
-            WHERE "userId" = ${userId} AND "nextReviewDate" <= ${new Date()}
-            ORDER BY RANDOM()
-        `;
+        const [wordsToReview, unReviewedCount, rememberedCount] = await Promise.all([
+            prisma.$queryRaw`
+                SELECT * FROM "words" WHERE "userId" = ${userId} AND "nextReviewDate" <= ${new Date()} ORDER BY RANDOM()
+            `,
+            prisma.word.count({
+                where: {
+                    userId,
+                    status: "UNREVIEWED",
+                },
+            }),
+            prisma.word.count({
+                where: {
+                    userId,
+                    status: "REMEMBERED",
+                },
+            }),
+        ])
         return res.status(200).json({
             success: true,
-            data: wordsToReview,
+            data: {
+                wordsToReview,
+                stats: {
+                    needReview: (wordsToReview as any[]).length,
+                    unreviewed: unReviewedCount,
+                    remembered: rememberedCount,
+                },
+            },
         });
     } catch (error) {
         console.error("Error in getWordsToReview:", error);
@@ -265,28 +322,40 @@ export async function updateWordReview(req: Request, res: Response) {
 
         let newEF = word.easinessFactor;
         let newInterval = word.intervalDays;
+        let newCorrectCount = word.correctCount;
+        let newWrongCount = word.wrongCount;
+        let newStatus = word.status
 
         if (performance === "easy") {
-
-            if (duration < 2000) newEF += 0.15;
-            else if (duration < 5000) newEF += 0.1;
+            if (duration < 3000) newEF += 0.15;
+            else if (duration < 6000) newEF += 0.10;
             else newEF -= 0.15;
 
-            // Chặn ngưỡng EF
-            if (newEF < 1.3) newEF = 1.3;
-            if (newEF > 2.8) newEF = 2.8;
-
-            // Tính toán Interval
             if (word.intervalDays === 0) newInterval = 1;
             else if (word.intervalDays === 1) newInterval = 3;
             else newInterval = Math.floor(word.intervalDays * newEF);
 
-            word.correctCount += 1;
+            newCorrectCount += 1;
+            newStatus = "REMEMBERED";
+
+        } else if (performance === "vague") {
+
+            if (duration < 3000) newEF -= 0.05;
+            else newEF -= 0.15;
+
+            if (word.intervalDays === 0) newInterval = 1;
+            else if (word.intervalDays <= 3) newInterval = word.intervalDays + 1;
+            else newInterval = Math.floor(word.intervalDays * Math.min(newEF, 1.5));
+
+            newCorrectCount += 1;
+            newStatus = "REMEMBERED";
+
         } else {
 
-            word.wrongCount += 1;
+            newWrongCount += 1;
             newInterval = 1;
             newEF = Math.max(1.3, newEF - 0.2);
+            newStatus = "FORGOTTEN";
         }
 
         const nextReviewDate = new Date(Date.now() + newInterval * 24 * 60 * 60 * 1000);
@@ -295,19 +364,26 @@ export async function updateWordReview(req: Request, res: Response) {
         const updatedWord = await prisma.word.update({
             where: { id: wordId },
             data: {
-                correctCount: word.correctCount,
-                wrongCount: word.wrongCount,
+                correctCount: newCorrectCount,
+                wrongCount: newWrongCount,
                 intervalDays: newInterval,
                 easinessFactor: newEF,
-                nextReviewDate: nextReviewDate
+                nextReviewDate: nextReviewDate,
+                status: newStatus
             },
         });
 
+        const formatDate = (date: Date): string => {
+            const day = String(date.getUTCDate()).padStart(2, "0");
+            const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+            const year = date.getUTCFullYear();
+            return `${day}-${month}-${year}`;
+        };
 
         return res.status(200).json({
             nextInterval: updatedWord.intervalDays,
             nextEF: parseFloat(updatedWord.easinessFactor.toFixed(2)),
-            nextReviewDate: updatedWord.nextReviewDate
+            nextReviewDate: formatDate(updatedWord.nextReviewDate)
         });
 
     } catch (error) {
