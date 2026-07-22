@@ -38,6 +38,17 @@ export const categoryApi = createApi({
             },
             providesTags: ["categories"]
         }),
+        getCategoriesWithoutWord: builder.query<CategoryType[], { word: string }>({
+            query: ({ word }) => ({
+                url: "category/get-without-word",
+                params: { word }
+            }),
+            keepUnusedDataFor: 60,
+            transformResponse: (response: CategoryResponse) => {
+                return response.data ?? [];
+            },
+            providesTags: ["categories"]
+        }),
         addCategory: builder.mutation<CategoryType, AddCategoryPayload>({
             query: (payload) => ({
                 url: "category/add",
@@ -74,4 +85,4 @@ export const categoryApi = createApi({
 
 })
 
-export const { useGetAllCategoriesQuery, useAddCategoryMutation, useDeleteCategoryMutation, useUpdateCategoryMutation } = categoryApi;
+export const { useGetAllCategoriesQuery, useGetCategoriesWithoutWordQuery, useAddCategoryMutation, useDeleteCategoryMutation, useUpdateCategoryMutation } = categoryApi;

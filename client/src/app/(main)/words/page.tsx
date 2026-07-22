@@ -74,6 +74,7 @@ const Words = () => {
     [selectedIds]
   )
 
+  console.log("danh sách từ", wordsData);
 
 
 
@@ -109,6 +110,8 @@ const Words = () => {
         <StatItem iconName='brain-circuit' iconColor='red' title='Cần ôn tập' value="12" />
         <StatItem iconName='flame' iconColor='yellow' title='Streak' value="20" />
       </div>
+
+      { }
 
       <div className='bg-sidebar flex  flex-col md:flex-row md:items-center px-4 py-6 shadow rounded-xl gap-4 md:gap-10 overflow-hidden'>
         <div className='relative bg-red'>

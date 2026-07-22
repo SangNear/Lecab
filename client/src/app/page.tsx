@@ -9,7 +9,7 @@ import Link from 'next/link'
 async function getAuthStatus() {
   const cookieStore = await cookies() // 👈 thêm await
   const token = cookieStore.get("refreshToken")
-  console.log('Token from cookies:', token) // Debug: Kiểm tra giá trị token
+
   return !!token
 }
 
@@ -23,7 +23,7 @@ const Homepage = async () => {
             <div className='p-2 bg-accent rounded-lg'>
               <BookOpen className='w-5 h-5 text-primary-foreground' />
             </div>
-            <span className='text-foreground font-lora text-xl font-bold'>Lexis</span>
+            <span className='text-foreground font-lora text-xl font-bold'>Vocab</span>
           </div>
           <div className='flex items-center gap-4 '>
             <ThemeSwitcher />

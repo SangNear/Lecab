@@ -5,6 +5,8 @@ import { Lora, DM_Sans, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/provider/index";
 import { Toaster } from "sonner";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { env } from "process";
 
 
 
@@ -24,7 +26,7 @@ const inter = Inter({
 })
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
-
+const clientId = env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 export default function RootLayout({
   children,
 }: {
@@ -39,10 +41,12 @@ export default function RootLayout({
         antialiased
         min-h-screen `}
       >
-        <Providers>
-          <Toaster />
-          {children}
-        </Providers>
+        <GoogleOAuthProvider clientId={clientId}>
+          <Providers>
+            <Toaster />
+            {children}
+          </Providers>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

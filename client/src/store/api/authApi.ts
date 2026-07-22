@@ -19,6 +19,14 @@ export const authApi = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
 
+        googleLogin: builder.mutation<AuthResponse, { token: string }>({
+            query: (credentials) => ({
+                url: "auth/google-login",
+                method: "POST",
+                body: credentials,
+            }),
+        }),
+
         login: builder.mutation<AuthResponse, AuthRequest>({
             query: (credentials) => ({
                 url: "auth/login",
@@ -41,4 +49,4 @@ export const authApi = createApi({
         })
     })
 })
-export const { useLoginMutation, useLogoutMutation } = authApi;
+export const { useLoginMutation, useLogoutMutation, useRegisterMutation, useGoogleLoginMutation } = authApi;

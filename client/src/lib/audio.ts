@@ -60,7 +60,7 @@ const getUSVoice = () => {
 };
 type Accent = "us" | "uk";
 
-export const speak = (text: string, accent: Accent = "us") => {
+export const speak = (text: string, accent: Accent) => {
   if (!("speechSynthesis" in window)) return;
 
   speechSynthesis.cancel();

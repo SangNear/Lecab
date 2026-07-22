@@ -6,10 +6,10 @@ import ThemeSwitcher from "./theme-switcher";
 
 const HeaderComponent = () => {
   return (
-    <header className="flex h-20 w-full items-center justify-between   px-10 lg:px-20 max-w-7xl mx-auto">
-      <p className="font-lora text-lg font-bold italic">Tổng quan học tập</p>
+    <header className="flex h-20 w-full items-center    px-10 lg:px-20 max-w-7xl mx-auto">
 
-      <div className="flex items-center gap-2">
+
+      <div className="flex items-center gap-2 ml-auto ">
         <ThemeSwitcher />
         <Link
           href="/add-a-word"

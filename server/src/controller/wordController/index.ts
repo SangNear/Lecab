@@ -3,7 +3,8 @@ import { GoogleGenAI } from "@google/genai";
 import type { Request, Response } from "express";
 import { prisma } from "../../lib/prisma.js";
 import { Prisma } from "../../generated/prisma/client.js";
-import { LEXIS_PROMPT_STORY } from "../../prompts/index.js";
+import { LEXIS_PROMPT_DICTIONARY, LEXIS_PROMPT_STORY } from "../../prompts/index.js";
+
 
 
 
@@ -74,6 +75,8 @@ export async function addWord(req: Request, res: Response) {
                 example: item.example,
                 pronunciation: item.pronunciation,
                 partsofSpeech: item.partsofSpeech,
+                collocations: item.collocations,
+                synonyms: item.synonyms,
                 correctCount: 0,
                 wrongCount: 0,
                 level: 0,
@@ -463,3 +466,92 @@ export async function quiz(req: Request, res: Response) {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 }
+
+async function waitForReady(headword: string, maxAttempts = 10) {
+    for (let i = 0; i < maxAttempts; i++) {
+        const entry = await prisma.dictionary.findUnique({ where: { word: headword } });
+
+        if (entry === null) return null;
+        if (entry.status === 'READY') return entry;
+        if (entry.status === 'FAIL') throw new Error('Generation failed');
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    throw new Error('Timeout waiting for entry');
+}
+function isUniqueConstraintError(error: unknown): boolean {
+    return (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+    );
+}
+
+async function generateDictionary(headword: string) {
+    const prompt = LEXIS_PROMPT_DICTIONARY(headword)
+    const response = await ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite',
+        contents: prompt
+    });
+    let textResponse = response.text;
+    textResponse = textResponse?.replace(/```json/g, "").replace(/```/g, "").trim();
+    const jsonResult = JSON.parse(textResponse as string);
+
+    return jsonResult
+}
+
+// service — giữ nguyên logic hiện tại, chỉ đổi tên cho rõ vai trò
+async function lookupWord(rawWord: string) {
+    const headword = rawWord.trim().toLowerCase();
+
+    let entry = await prisma.dictionary.findUnique({ where: { word: headword } });
+
+    if (entry?.status === "READY") {
+        return entry;
+    }
+
+    if (entry?.status === "PENDING") {
+        return await waitForReady(headword);
+    }
+
+    try {
+        entry = await prisma.dictionary.create({
+            data: {
+                word: headword,
+                status: "PENDING",
+            },
+        });
+    } catch (error) {
+        if (isUniqueConstraintError(error)) {
+            return await waitForReady(headword);
+        }
+        throw error;
+    }
+
+    const data = await generateDictionary(headword);
+    if (data.length === 0) {
+        await prisma.dictionary.delete({ where: { word: headword } });
+        return null;
+    }
+
+    entry = await prisma.dictionary.update({
+        where: { word: headword },
+        data: {
+            definitions: data, // gán trực tiếp mảng vào field definitions, KHÔNG spread
+            status: "READY",
+        },
+    });
+    return entry;
+}
+
+// controller — đúng chuẩn Express handler, dùng trong router.get
+export async function lookup(req: Request, res: Response) {
+    try {
+        const rawWord = req.params.word as string; // hoặc req.query.word tuỳ mày dùng path param hay query param
+        const entry = await lookupWord(rawWord);
+        res.json(entry);
+    } catch (error) {
+        res.status(500).json({ message: "Lookup failed", error: (error as Error).message });
+    }
+}
+
+

@@ -12,6 +12,7 @@ export async function addCategory(req: Request, res: Response) {
 
         const isCategoryExist = await prisma.category.findFirst({
             where: {
+                userId,
                 name,
             }
         });
@@ -19,6 +20,7 @@ export async function addCategory(req: Request, res: Response) {
 
         const newCategory = await prisma.category.create({
             data: {
+                userId,
                 name,
                 description,
                 iconSlug: iconSlug || iconSlugDefault,
@@ -33,7 +35,10 @@ export async function addCategory(req: Request, res: Response) {
 
 export async function getCategories(req: Request, res: Response) {
     try {
+        const userId = req.user?.userId
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
         const categories = await prisma.category.findMany({
+            where: { userId },
             include: {
                 _count: {
                     select: {
@@ -62,6 +67,54 @@ export async function getCategories(req: Request, res: Response) {
     }
 }
 
+export async function getCategoriesWithoutWord(req: Request, res: Response) {
+    try {
+        const userId = req.user?.userId
+        if (!userId) return res.status(401).json({ message: "Unauthorized" });
+        const { word } = req.query;
+        if (!word) return res.status(400).json({ message: "Word is required" });
+
+        const categories = await prisma.category.findMany({
+            where: {
+                words: {
+                    none: {
+                        word: {
+                            equals: (word as string).trim(),
+                            mode: 'insensitive'
+                        }
+                    }
+                },
+                userId
+            },
+            include: {
+                _count: {
+                    select: {
+                        words: true
+                    }
+                }
+            },
+        });
+
+        const data = categories.map((category) => ({
+            id: category.id,
+            name: category.name,
+            description: category.description,
+            createdAt: category.createdAt.toISOString(),
+            updatedAt: category.updatedAt.toISOString(),
+            wordCount: category._count.words,
+            iconSlug: category.iconSlug,
+        }));
+
+        return res.status(200).json({
+            message: "Categories without word fetched successfully",
+            data,
+        });
+    } catch (error) {
+        console.error("Error in getCategoriesWithoutWord:", error);
+        return res.status(500).json({ message: "Failed to get categories without word" });
+    }
+}
+
 export async function updateCategory(req: Request, res: Response) {
     try {
         const userId = req.user?.userId;
@@ -70,6 +123,7 @@ export async function updateCategory(req: Request, res: Response) {
 
         const isCategoryExist = await prisma.category.findFirst({
             where: {
+                userId,
                 id: categoryId,
             }
         })
@@ -99,6 +153,7 @@ export async function deleteCategory(req: Request, res: Response) {
 
         const isCategoryExist = await prisma.category.findFirst({
             where: {
+                userId,
                 id: categoryId,
             }
         })

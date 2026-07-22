@@ -5,12 +5,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import CustomSelect from '@/components/custom/selectCustom'
+import { usePracticeData } from '@/hooks/usePracticeData'
 
 interface PracticeConfigScreenProps {
     selectedMode: "quiz" | "listen" | "write" | "flashcard" | null
     currentScreen: number
     setCurrentScreen: React.Dispatch<React.SetStateAction<number>>
-    practiceHook: any
+    practiceHook: ReturnType<typeof usePracticeData>
     onStartPractice: () => void
 }
 
@@ -31,12 +32,6 @@ const PracticeConfigScreen = ({
         { value: "meaning-to-word", label: "Nhìn nghĩa chọn từ", description: "Hiện nghĩa làm đề bài, bạn chọn từ vựng tương ứng." },
         { value: "both", label: "Cả hai", description: "Kết hợp cả hai chế độ trên." }
     ]
-
-    const flashcardModeOptions = [
-        { value: "word-to-meaning", label: "Nhìn từ trước", description: "Nhận diện mặt từ suy đoán nghĩa." },
-        { value: "meaning-to-word", label: "Nhìn nghĩa trước", description: "Nhận diện mặt nghĩa suy đoán từ." },
-    ]
-
     if (selectedMode === "flashcard") {
         console.log("thông tin card,", hasWords ? listWords : "Không có dữ liệu");
     }
@@ -68,63 +63,24 @@ const PracticeConfigScreen = ({
 
                                 <div className='grid grid-cols-3 gap-4 mt-2'>
                                     <div className="p-3.5 rounded-xl border text-center transition-all bg-red-500/5">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400 block font-bold  ">Cần ôn hôm nay</span>
-                                        <span className="text-2xl font-black text-rose-500 font-mono">{p.listFlashCard?.length || 0}</span>
+                                        <span className=" text-gray-500 dark:text-gray-400 block font-bold  ">Cần ôn hôm nay</span>
+                                        <span className="text-2xl font-black text-rose-500 font-mono">{p.statFlashCard?.needReview}</span>
 
                                     </div>
 
                                     <div className="p-3.5 rounded-xl border text-center transition-all bg-orange-500/5">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400 block font-bold  ">Thẻ chưa học</span>
-                                        <span className="text-2xl font-black text-accent font-mono">20</span>
+                                        <span className=" text-gray-500 dark:text-gray-400 block font-bold  ">Từ chưa học</span>
+                                        <span className="text-2xl font-black text-accent font-mono">{p.statFlashCard?.unreviewed}</span>
 
                                     </div>
 
                                     <div className="p-3.5 rounded-xl border border-green-500/10 text-center transition-all bg-green-500/5">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400 block font-bold  ">Đã thuộc</span>
-                                        <span className="text-2xl font-black text-green-500 font-mono">10442</span>
+                                        <span className=" text-gray-500 dark:text-gray-400 block font-bold  ">Đã thuộc</span>
+                                        <span className="text-2xl font-black text-green-500 font-mono">{p.statFlashCard?.remembered}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* 💡 Sử dụng biến hasWords rút gọn */}
-                            {hasWords && (
-                                <>
-                                    <div className="space-y-2 mt-4">
-                                        <label className="text-xs font-bold uppercase tracking-wider text-orange-500 block">Mặt thẻ hiển thị đầu tiên</label>
-                                        <RadioGroup className="grid grid-cols-2" defaultValue="word-to-meaning" onValueChange={(val) => p.setFlashcardMode(val as any)}>
-                                            {flashcardModeOptions.map((option) => (
-                                                <div key={option.value} className="w-full flex items-center gap-3 border border-border hover:shadow duration-300 rounded-lg p-3">
-                                                    <RadioGroupItem value={option.value} id={option.value} />
-                                                    <label className='flex flex-col cursor-pointer w-full' htmlFor={option.value}>
-                                                        {option.label}
-                                                        <span className='text-muted text-xs'>{option.description}</span>
-                                                    </label>
-                                                </div>
-                                            ))}
-                                        </RadioGroup>
-                                    </div>
-
-                                    {/* <div className="space-y-2 mt-4">
-                                        <label className="text-xs font-bold uppercase tracking-wider text-orange-500 block">Chất giọng bản xứ phát âm</label>
-                                        <div className='flex items-center gap-2'>
-                                            <Button
-                                                variant={p.selectedVoice === "us" ? "default" : "outline"}
-                                                className={p.selectedVoice === "us" ? "bg-primary text-primary-foreground" : ""}
-                                                onClick={() => p.setSelectedVoice("us")}
-                                            >
-                                                Giọng mỹ (us)
-                                            </Button>
-                                            <Button
-                                                variant={p.selectedVoice === "uk" ? "default" : "outline"}
-                                                className={p.selectedVoice === "uk" ? "bg-primary text-primary-foreground" : ""}
-                                                onClick={() => p.setSelectedVoice("uk")}
-                                            >
-                                                Giọng Anh (uk)
-                                            </Button>
-                                        </div>
-                                    </div> */}
-                                </>
-                            )}
                         </div>
                     ) : (
                         <div className='flex flex-col gap-4'>
@@ -147,7 +103,7 @@ const PracticeConfigScreen = ({
                                 />
                             </div>
 
-                            {/* 💡 Sử dụng biến listWords rút gọn */}
+
                             <p className='text-green-400 font-semibold'> {listWords.length} từ sẵn sàng</p>
                         </div>
                     )}

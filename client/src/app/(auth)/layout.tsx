@@ -18,7 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                         />
                     </div>
                     <div className="flex flex-col text-center">
-                        <div className="font-lora text-2xl tracking-wider">Lexis</div>
+                        <div className="font-lora text-2xl tracking-wider">Vocab</div>
                         <div className="uppercase text-accent tracking-widest text-[12px] mt-0.5">Vocabulary</div>
                     </div>
                     <div className="font-lora italic text-background/75 text-center tracking-wider max-w-[200px] mt-2 text-[14px]">

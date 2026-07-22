@@ -36,15 +36,17 @@ model User {
   id        String   @id @default(uuid())
   name      String?
   email     String   @unique
-  password  String
+  password  String?
+  googleId  String?  @unique
   avatarUrl String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  words    Word[]
-  sessions Session[]
-  reviews  ReviewLog[]
+  words      Word[]
+  sessions   Session[]
+  reviews    ReviewLog[]
+  categories Category[]
 
   @@map("users")
 }
@@ -57,9 +59,11 @@ model Category {
   updatedAt   DateTime @updatedAt
   iconSlug    String   @default("library")
   words       Word[]
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
 
-  @@unique([name])
-  @@index([name])
+  @@unique([name, userId])
+  @@index([userId])
   @@map("categories")
 }
 
@@ -133,4 +137,21 @@ model Session {
 
   @@index([userId, expiresAt])
   @@map("sessions")
+}
+
+model Dictionary {
+  id          String           @id @default(uuid())
+  word        String           @unique
+  definitions Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  status      DictionaryStatus @default(PENDING)
+
+  @@map("dictionary")
+}
+
+enum DictionaryStatus {
+  PENDING
+  READY
+  FAIL
 }

@@ -42,6 +42,8 @@ export const usePracticeData = ({ selectedMode, currentScreen }: UsePracticeData
         { skip: !selectedCategory || selectedMode === "flashcard" }
     )
 
+    const statFlashCard = wordFlashCards?.stats
+
     const listWords = selectedMode === "flashcard" ? wordFlashCards?.words : words?.data || []
 
     const listQuiz = useMemo(() => {
@@ -90,6 +92,7 @@ export const usePracticeData = ({ selectedMode, currentScreen }: UsePracticeData
         listListen,
         listWrite,
         listFlashCard,
+        statFlashCard,
         quantity,
         setQuantity,
         selectedCategory,

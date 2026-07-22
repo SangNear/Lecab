@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from "./baseQuery";
 import { getWordById } from "../../../../server/src/controller/wordController";
+import { categoryApi } from "./categoryApi";
 
 
 interface WordPayloadItem {
@@ -65,32 +66,6 @@ interface GetWordsResponse {
         limit: number;
     };
 }
-interface SynonymExample {
-    word: string;
-    level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
-    popularity: 1 | 2 | 3 | 4 | 5;
-    register: "Formal" | "Informal" | "Slang";
-    meaning: string;
-    example: [string, string]; // đúng 2 câu ví dụ
-}
-
-export interface SynonymGroup {
-    sense: string; // context_description_in_english
-    synonyms: SynonymExample[];
-}
-
-interface SynonymResponse {
-    synonyms_groups: SynonymGroup[];
-}
-
-/** Body of `GET /word/get-synonyms` */
-interface GetSynonymsApiResponse {
-    success?: boolean;
-    data?: SynonymResponse | null;
-}
-
-
-
 interface GetWordsParams {
     page?: number;
     limit?: number;
@@ -109,6 +84,61 @@ interface GetWordsToReviewResponse {
         stats: ReviewStats;
     };
 }
+
+export interface WordLookupResponse {
+    id: string;
+    word: string;
+    definitions: Definition[];
+    createdAt: string;
+    updatedAt: string;
+    status: "READY" | "PENDING" | "FAILED";
+}
+
+export interface Definition {
+    word: string;
+    example: Language[];
+    meaning: Language;
+    synonyms: Language[];
+    wordFamily: WordFamily[];
+    collocations: Language[];
+    partsofSpeech: PartOfSpeech;
+    pronunciation: string;
+    register: string
+    idioms: Idiom[]
+}
+
+export interface Idiom {
+    phrase: string
+    meaning: Language
+    example: Language
+}
+
+export interface Language {
+    en: string
+    vi: string
+}
+
+export interface WordFamily {
+    en: string;
+    vi: string;
+    partsofSpeech: PartOfSpeech;
+}
+
+export type PartOfSpeech =
+    | "noun"
+    | "verb"
+    | "adjective"
+    | "adverb"
+    | "pronoun"
+    | "preposition"
+    | "conjunction"
+    | "interjection"
+    | "determiner"
+    | "article"
+    | "auxiliary verb"
+    | "modal verb"
+    | "phrase";
+
 export const wordApi = createApi({
     reducerPath: "wordApi",
     baseQuery: baseQueryWithReauth,
@@ -147,7 +177,15 @@ export const wordApi = createApi({
                 method: "POST",
                 body: word,
             }),
-            invalidatesTags: ['words', 'wordsToReview']
+            invalidatesTags: ['words', 'wordsToReview'],
+            async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+                try {
+                    await queryFulfilled;
+                    dispatch(categoryApi.util.invalidateTags(['categories']));
+                } catch {
+                    // no-op, để .catch() ở component xử lý toast lỗi
+                }
+            },
         }),
 
         getWordsToReview: builder.query<{ words: WordType[]; stats: ReviewStats }, void>({
@@ -171,18 +209,14 @@ export const wordApi = createApi({
             }),
 
         }),
-        getSynonyms: builder.query<SynonymGroup[], { wordId: string }>({
-            query: ({ wordId }) => ({
-                url: `word/get-synonyms?wordId=${encodeURIComponent(wordId)}`,
+        lookupWord: builder.query<WordLookupResponse, { word: string }>({
+            query: ({ word }) => ({
+                url: `word/dictionary/${encodeURIComponent(word)}`,
                 method: "GET",
             }),
-            providesTags: ['synonyms'],
-            transformResponse: (response: GetSynonymsApiResponse) => {
-                return response?.data?.synonyms_groups ?? [];
-            }
-        }),
+        })
 
 
     })
 })
-export const { useCreateWordsMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useGetSynonymsQuery, useUpdateWordMutation, useGetWordByIdQuery } = wordApi;
+export const { useLazyLookupWordQuery, useCreateWordsMutation, useGetWordsQuery, useGetWordsToReviewQuery, useUpdateWordReviewMutation, useUpdateWordMutation, useGetWordByIdQuery } = wordApi;

@@ -56,7 +56,7 @@ export function WordDetail({ word, open, onClose }: WordDrawerProps) {
     };
     return (
         <Drawer direction="right" open={open} onOpenChange={(v) => !v && onClose()}>
-            <DrawerContent >
+            <DrawerContent className="overflow-y-auto overflow-x-hidden" >
                 <DrawerHeader className="relative">
                     <div className="flex items-center gap-2">
 

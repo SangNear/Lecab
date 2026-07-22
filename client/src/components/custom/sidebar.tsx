@@ -32,12 +32,12 @@ export const sidebarItems = [
     {
         icon: BookOpen,
         href: "/library",
-        label: "Thư viện"
+        label: "Bộ từ"
     },
     {
         icon: Sparkles,
-        href: "/make-story",
-        label: "Tạo câu chuyện"
+        href: "/dictionary",
+        label: "Từ điển"
     },
 
 
@@ -51,7 +51,7 @@ const Sidebar = () => {
     const sidebarTextColor = theme === 'dark' ? 'text-white' : 'text-black'
 
     return (
-        <div className=' hidden lg:flex flex-col max-w-62.5 min-w-62.5 h-screen  sticky top-0 left-0 '>
+        <div className=' hidden bg-accent/10 lg:flex flex-col max-w-62.5 min-w-62.5 h-screen  sticky top-0 left-0 '>
             <div className='p-8 '>
                 <Image src="/logo.svg" alt="logo" width={40} height={40} className='w-full h-auto' />
 
@@ -83,20 +83,21 @@ const Sidebar = () => {
                 ))}
             </nav>
             <div className='flex items-center gap-2  pb-6 px-4 '>
-                <Image src={user?.avatarUrl || "https://github.com/evilrabbit.png"}
-                    alt="avatar"
-                    width={30}
-                    height={30}
-                    className='w-10 h-10 rounded-full'
-                />
-                <div className='flex flex-col gap-2'>
-                    <span className={`font-semibold text-sm ${sidebarTextColor}`}>{user?.name}</span>
-                    <span className={`font-semibold text-sm ${sidebarTextColor}`}>{user?.email}</span>
-                </div>
-                <div>
-                    <LogOutIcon className={`w-4 h-4 ${sidebarTextColor}`} onClick={() => setOpenLogoutModal(true)} />
+                {user && (
+                    <>
+                        <Image src={user?.avatarUrl || "https://github.com/evilrabbit.png"}
+                            alt="avatar"
+                            width={30}
+                            height={30}
+                            className='w-10 h-10 rounded-full'
+                        />
+                        <div className='flex flex-col gap-2'>
+                            <span className={`font-semibold text-sm ${sidebarTextColor}`}>{user?.name}</span>
+                            <span className={`font-semibold text-sm  ${sidebarTextColor}`}>{user?.email}</span>
+                        </div>
 
-                </div>
+                    </>
+                )}
             </div>
         </div>
     );

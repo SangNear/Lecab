@@ -25,6 +25,8 @@ export interface PracticeResult<TType extends AnyResult["practiceType"], TRetry 
 type QuizResult = PracticeResult<"quiz", QuizItem[]>
 type ListenResult = PracticeResult<"listen", BasePracticeItem[]>
 type WriteResult = PracticeResult<"write", BasePracticeItem[]>
+
+
 export type AnyResult = QuizResult | ListenResult | WriteResult
 export type RetryItems = QuizItem[] | BasePracticeItem[]
 
@@ -42,6 +44,7 @@ const PracticePage = () => {
     const handleStartPractice = () => {
         p.startPractice()
         setCurrentScreen(3)
+
     }
 
     const handleRetry = (mode: string) => {

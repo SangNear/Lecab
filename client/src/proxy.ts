@@ -33,6 +33,7 @@ export const config = {
     "/login",
     "/register",
     "/review",
-    "/add-a-word",
+    "/practice",
+    "/words",
   ],
 };

@@ -158,7 +158,7 @@ const ListenMode = ({ listListen, onFinish }: ListenModeProps) => {
                     <Input
                         type="text"
                         value={userInput}
-                        autoFocus
+                        autoComplete="on"
                         placeholder='Điền từ bạn nghe được...'
                         onChange={(e) => setUserInput(e.target.value)}
                         disabled={isChecked}

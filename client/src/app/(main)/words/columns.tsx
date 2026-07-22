@@ -60,7 +60,7 @@ export const getColumns = (
             cell: ({ row }) => {
                 const meaning = row.original.meaning;
                 return (
-                    <div className="px-6 py-6 border-r  ">{meaning}</div>
+                    <p className="px-6 py-6 border-r  text-ellipsis whitespace-nowrap overflow-hidden max-w-55">{meaning}</p>
                 )
             }
         },

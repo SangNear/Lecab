@@ -1,5 +1,5 @@
 import express from "express";
-import { addWord, generateStory, getWordById, getWordsToReview, getWordsWithFilter, quiz, updateWord, updateWordReview } from "../../controller/wordController/index.js";
+import { addWord, generateStory, getWordById, getWordsToReview, getWordsWithFilter, lookup, quiz, updateWord, updateWordReview } from "../../controller/wordController/index.js";
 import { verifyAccessToken } from "../../middleware.js";
 
 
@@ -14,4 +14,6 @@ router.post("/update-word-review", verifyAccessToken, updateWordReview);
 // router.get("/generate-word-detail/:wordParams", verifyAccessToken, generateWordDetail);
 router.get("/generate-story", verifyAccessToken, generateStory);
 router.get("/quiz/:categoryId", quiz);
+
+router.get("/dictionary/:word", lookup)
 export default router;

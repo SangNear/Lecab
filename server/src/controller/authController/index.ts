@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { comparePassword, generateAccessToken, generateRefreshToken, hashPassword, hashToken } from "../../utility/index.js";
+import { comparePassword, generateAccessToken, generateRefreshToken, hashPassword, hashToken, verifyGoogleToken } from "../../utility/index.js";
 import jwt from "jsonwebtoken";
 import { prisma } from "../../lib/prisma.js";
 
@@ -61,6 +61,65 @@ export const register = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+export const googleLogin = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.body;
+        if (!token) {
+            return res.status(400).json({ message: "Token is required" });
+        }
+        const { googleId, email, name, avatarUrl } = await verifyGoogleToken(token);
+        let user = await prisma.user.findUnique({ where: { email } });
+
+        if (user) {
+            if (!user.googleId) {
+                user = await prisma.user.update({
+                    where: { id: user.id },
+                    data: {
+                        googleId,
+                        ...(avatarUrl && !user.avatarUrl ? { avatarUrl } : {}),
+                    },
+                });
+            }
+        } else {
+            user = await prisma.user.create({
+                data: {
+                    email,
+                    name: name || null,
+                    googleId,
+                    ...(avatarUrl ? { avatarUrl } : {}),
+                },
+            });
+        }
+        const accessToken = generateAccessToken(String(user.id));
+        const refreshToken = generateRefreshToken(String(user.id));
+        const hashedRefreshToken = hashToken(refreshToken);
+
+        await prisma.session.create({
+            data: {
+                userId: String(user.id),
+                deviceInfo: req.headers["user-agent"] || "",
+                refreshToken: hashedRefreshToken,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            },
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+
+        res.json({
+            accessToken,
+            user: { id: user.id, name: user.name, avatarUrl: user.avatarUrl, email: user.email },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
 export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
@@ -77,7 +136,7 @@ export const login = async (req: Request, res: Response) => {
             return res.status(400).json({ message: "Invalid Credentials" });
         }
 
-        const isPasswordCorrect = await comparePassword(password, user.password)
+        const isPasswordCorrect = await comparePassword(password, user.password || "")
         if (!isPasswordCorrect) {
             return res.status(400).json({ message: "Invalid Credentials" });
         }
@@ -191,15 +250,15 @@ export const getMe = async (req: Request, res: Response) => {
                 name: true,
                 email: true,
                 avatarUrl: true,
-                  
-              }
+
+            }
         })
-        if(!user) {
+        if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.json({user})
+        res.json({ user })
 
-        
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal server error" });
